@@ -1,39 +1,47 @@
-﻿import { useEffect, useState } from 'react';
-import './App.css';
-import Register from './Register';
-import Order from './Order';
+﻿import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import CartPage from './pages/CartPage';
+import Header from './components/Header';
 
-function App() {
-    const [pakiautomaadid, setPakiautomaadid] = useState([]);
-    const [products, setProducts] = useState([]);
+const App = () => {
+    const [cartItems, setCartItems] = useState([]);
 
-    useEffect(() => {
-        fetch("https://localhost:7188/parcelmachine")
-            .then(res => res.json())
-            .then(json => setPakiautomaadid(json));
+    const addToCart = (product) => {
+        setCartItems((prevItems) => {
+            const existingItem = prevItems.find((item) => item.id === product.id);
+            if (existingItem) {
+                return prevItems.map((item) =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + product.quantity }
+                        : item
+                );
+            }
+            return [...prevItems, { ...product, quantity: product.quantity }];
+        });
+    };
 
-        fetch("https://localhost:7188/api/products") // URL для получения продуктов
-            .then(res => res.json())
-            .then(json => setProducts(json));
-    }, []);
+    const removeFromCart = (id) => {
+        setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    };
+
+    const updateQuantity = (id, newQuantity) => {
+        setCartItems((prevItems) =>
+            prevItems.map(item =>
+                item.id === id ? { ...item, quantity: newQuantity } : item
+            )
+        );
+    };
 
     return (
-        <div className="App">
-            <h1>Parcel Machines</h1>
-            <select>
-                {pakiautomaadid.map(automaat =>
-                    <option key={automaat.ID}>
-                        {automaat.NAME}
-                    </option>)}
-            </select>
-
-            <h2>Register</h2>
-            <Register />
-
-            <h2>Order Products</h2>
-            <Order products={products} />
-        </div>
+        <Router>
+            <Header />
+            <Routes>
+                <Route path="/" element={<HomePage addToCart={addToCart} />} />
+                <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />} />
+            </Routes>
+        </Router>
     );
-}
+};
 
 export default App;
