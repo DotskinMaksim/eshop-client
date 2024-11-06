@@ -40,6 +40,11 @@ const QuantitySelector = styled.div`
   display: flex;
   justify-content: center;
   margin-top: 10px;
+  input {
+    width: 50px;
+    text-align: center;
+    margin: 0 10px;
+  }
 `;
 
 const ProductList = ({ addToCart }) => {
@@ -48,12 +53,11 @@ const ProductList = ({ addToCart }) => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await fetch('https://localhost:7188/api/products');
+                const response = await fetch('https://localhost:7188/api/products/withtax');
                 if (!response.ok) {
                     throw new Error('Failed to fetch products');
                 }
                 const data = await response.json();
-                // Инициализируем количество для каждого продукта
                 const initializedProducts = data.map(product => ({
                     ...product,
                     amount: 1 // Устанавливаем начальное количество
@@ -67,12 +71,34 @@ const ProductList = ({ addToCart }) => {
         fetchProducts();
     }, []);
 
-    const taxRate = 1.20; // 20% налог
-
     const updateAmount = (id, newAmount) => {
+        if (newAmount > 0) {
+            setProducts((prevProducts) =>
+                prevProducts.map((product) =>
+                    product.id === id ? { ...product, amount: newAmount } : product
+                )
+            );
+        }
+    };
+
+    const handleAddToCart = (product) => {
+        let productAdd = { ...product };
+
+        // Учитываем стоимость бутылки, если есть
+        if (productAdd.hasBottle) {
+            productAdd.pricePerUnit += 0.10; // Добавляем стоимость бутылки
+        }
+
+        addToCart({
+            ...productAdd,
+            quantity: productAdd.amount,
+            price: productAdd.pricePerUnit, // Убираем расчет с налогом
+        });
+
+        // Сброс количества после добавления в корзину
         setProducts((prevProducts) =>
-            prevProducts.map((product) =>
-                product.id === id ? { ...product, amount: newAmount } : product
+            prevProducts.map((p) =>
+                p.id === product.id ? { ...p, amount: 1 } : p
             )
         );
     };
@@ -84,14 +110,31 @@ const ProductList = ({ addToCart }) => {
                     <ProductImage src={product.imageUrl} alt={product.name} />
                     <ProductName>{product.name}</ProductName>
                     <ProductPrice>
-                        €{(product.price * taxRate).toFixed(2)} {product.pricePerKg ? "/kg" : ""}
+                        €
+                        {(product.pricePerUnit + (product.hasBottle ? 0.10 : 0)).toFixed(2)}
+                        {product.unit === "kg" ? "/kg" : ""}
                     </ProductPrice>
                     <QuantitySelector>
-                        <button onClick={() => updateAmount(product.id, product.amount + 1)}>+</button>
-                        <p>{product.amount}</p>
-                        <button onClick={() => updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)}>-</button>
+                        {product.unit === "kg" ? (
+                            <>
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    min="0.1"
+                                    value={product.amount}
+                                    onChange={(e) => updateAmount(product.id, parseFloat(e.target.value))}
+                                />
+                                <span>kg</span>
+                            </>
+                        ) : (
+                            <>
+                                <button onClick={() => updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)}>-</button>
+                                <p>{product.amount}</p>
+                                <button onClick={() => updateAmount(product.id, product.amount + 1)}>+</button>
+                            </>
+                        )}
                     </QuantitySelector>
-                    <button onClick={() => addToCart({ ...product, quantity: product.amount })}>Добавить в корзину</button>
+                    <button onClick={() => handleAddToCart(product)}>Добавить в корзину</button>
                 </ProductCard>
             ))}
         </ProductListContainer>

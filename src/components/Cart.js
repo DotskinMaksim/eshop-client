@@ -20,7 +20,27 @@ const QuantitySelector = styled.div`
   align-items: center;
 `;
 
+const TotalAmount = styled.div`
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+`;
+
 const Cart = ({ cartItems, removeFromCart, updateQuantity }) => {
+
+    const handleQuantityChange = (id, value) => {
+        if (value > 0) {
+            updateQuantity(id, parseFloat(value));
+        }
+    };
+
+    // Вычисление общей суммы корзины
+    const calculateTotal = () => {
+        return cartItems.reduce((total, item) => {
+            return total + (item.pricePerUnit * item.quantity);
+        }, 0).toFixed(2);
+    };
+
     return (
         <CartContainer>
             <h1>Корзина</h1>
@@ -31,16 +51,40 @@ const Cart = ({ cartItems, removeFromCart, updateQuantity }) => {
                     <CartItem key={item.id}>
                         <div>
                             <h3>{item.name}</h3>
-                            <p>Цена: €{(item.price * 1.20).toFixed(2)}</p>
+                            <p>Цена: €{(item.pricePerUnit * item.quantity).toFixed(2)}</p>
                             <QuantitySelector>
-                                <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
-                                <p>{item.quantity}</p>
-                                <button onClick={() => updateQuantity(item.id, item.quantity - 1 > 0 ? item.quantity - 1 : 1)}>-</button>
+                                {item.unit === "kg" ? (
+                                    <>
+                                        <span>Количество: </span>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            min="0.1"
+                                            value={item.quantity}
+                                            onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                                        />
+                                        <span>кг</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>Количество: </span>
+
+                                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
+                                        <p>{item.quantity}</p>
+                                        <button onClick={() => updateQuantity(item.id, item.quantity - 1 > 0 ? item.quantity - 1 : 1)}>-</button>
+                                    </>
+                                )}
                             </QuantitySelector>
                         </div>
                         <button onClick={() => removeFromCart(item.id)}>Удалить</button>
                     </CartItem>
                 ))
+            )}
+
+            {cartItems.length > 0 && (
+                <TotalAmount>
+                    Общая сумма: €{calculateTotal()}
+                </TotalAmount>
             )}
         </CartContainer>
     );
