@@ -32,7 +32,10 @@ const Header = () => {
             <h1 style={{ color: 'white' }}>My App</h1>
             <Nav>
                 <NavLink to="/">Home</NavLink>
-                <NavLink to="/cart">Корзина</NavLink> {/* Добавьте ссылку на корзину */}
+                <NavLink to="/cart">Корзина</NavLink>
+                <NavLink to="/register">Регистр</NavLink>
+                <NavLink to="/login">Логин</NavLink>
+
             </Nav>
         </HeaderContainer>
     );
