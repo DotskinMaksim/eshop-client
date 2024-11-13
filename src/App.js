@@ -11,24 +11,35 @@ const App = () => {
     const [cartItems, setCartItems] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    // Функция для авторизации пользователя
-    const login = () => {
-        // Здесь можно добавить логику аутентификации (например, проверку через API или localStorage)
-        localStorage.setItem('authToken', 'user-token');  // Для примера, сохраняем токен в localStorage
-        setIsAuthenticated(true);
-    };
-
-    // Функция для выхода из аккаунта
-    const logout = () => {
-        localStorage.removeItem('authToken');
-        setIsAuthenticated(false);
-    };
-
-    // Проверка статуса аутентификации при загрузке
+    // Загружаем корзину из localStorage при старте
     useEffect(() => {
+        const storedCart = JSON.parse(localStorage.getItem('cartItems'));
+        if (storedCart) {
+            setCartItems(storedCart);
+        }
         const token = localStorage.getItem('authToken');
         setIsAuthenticated(!!token);
     }, []);
+
+    // Сохраняем корзину в localStorage при изменении cartItems
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        }
+    }, [cartItems]);
+
+    // Функция для авторизации пользователя
+    const login = () => {
+        localStorage.setItem('authToken', 'user-token');
+        setIsAuthenticated(true);
+    };
+
+    const logout = () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('cartItems');  // Очистка корзины из localStorage
+        setIsAuthenticated(false);
+        setCartItems([]);  // Очистка состояния корзины
+    };
 
     const addToCart = (product) => {
         setCartItems((prevItems) => {

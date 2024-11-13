@@ -27,23 +27,13 @@ const NavLink = styled(Link)`
   }
 `;
 
-const Header = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const navigate = useNavigate(); // Для редиректа после выхода
-
-    useEffect(() => {
-        const checkUserAuth = async () => {
-            const authStatus = await checkAuth();
-            setIsAuthenticated(authStatus);
-        };
-        checkUserAuth();
-    }, []);
+const Header = ({ isAuthenticated, logout }) => {
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         const success = await logout();
         if (success) {
-            setIsAuthenticated(false);
-            navigate('/'); // Перенаправление на главную страницу после выхода
+            navigate('/'); // Перенаправляем на главную страницу после выхода
         }
     };
 
@@ -53,7 +43,6 @@ const Header = () => {
             <Nav>
                 <NavLink to="/">Home</NavLink>
                 <NavLink to="/cart">Корзина</NavLink>
-
                 {isAuthenticated ? (
                     <>
                         <NavLink to="/order">Заказ</NavLink>

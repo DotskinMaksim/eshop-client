@@ -1,44 +1,76 @@
-// src/pages/RegisterPage.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styles from './Register.module.css';
 
 const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            navigate('/'); // Перенаправление на главную, если уже авторизован
+        }
+    }, [navigate]);
+
     const handleRegister = async (e) => {
         e.preventDefault();
+
+        // Проверка на совпадение паролей
+        if (password !== confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
 
         const response = await fetch('https://localhost:7188/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userName: username, password: password, firstName, lastName }),
-            credentials: 'include', // Обеспечивает отправку cookies с запросом
+            body: JSON.stringify({ userName: username, password: password, email: email }),
+            credentials: 'include',
         });
 
+        // Проверка статуса ответа и типов контента
         if (response.ok) {
-            navigate('/login');
+            try {
+                const data = await response.json();  // Парсим только если ответ успешен
+                navigate('/login'); // Перенаправление на страницу логина после успешной регистрации
+            } catch (e) {
+                // Логирование ошибки для диагностики
+                setError('Failed to parse response as JSON: ' + e.message);
+            }
         } else {
-            setError('Registration failed.');
+            const errorText = await response.text();
+            setError(errorText || 'Registration failed.');
         }
     };
 
+
+
     return (
-        <div>
-            <h2>Register</h2>
-            <form onSubmit={handleRegister}>
+        <div className={styles.container}>
+            <h2 className={styles.heading}>Register</h2>
+            <form onSubmit={handleRegister} className={styles.form}>
                 <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
                     required
+                    className={styles.input}
+                />
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    required
+                    className={styles.input}
                 />
                 <input
                     type="password"
@@ -46,24 +78,20 @@ const RegisterPage = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     required
+                    className={styles.input}
                 />
                 <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First Name"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
                     required
+                    className={styles.input}
                 />
-                <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last Name"
-                    required
-                />
-                <button type="submit">Register</button>
+
+                <button type="submit" className={styles.button}>Register</button>
             </form>
-            {error && <p>{error}</p>}
+            {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
     );
 };

@@ -1,4 +1,3 @@
-// pages/CartPage.js
 import React from 'react';
 import Cart from '../components/Cart';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +17,10 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity }) => {
                 removeFromCart={removeFromCart}
                 updateQuantity={updateQuantity}
             />
-            <button onClick={handleOrderClick}>Заказать</button>
+            {/* Кнопка "Заказать" отображается только если корзина не пуста */}
+            {cartItems.length > 0 && (
+                <button onClick={handleOrderClick}>Заказать</button>
+            )}
         </div>
     );
 };

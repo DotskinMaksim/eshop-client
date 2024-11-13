@@ -1,3 +1,5 @@
+/* src/pages/Register.module.css */
+
 .container {
     max-width: 400px;
     margin: 0 auto;
@@ -12,24 +14,15 @@
     color: #333;
 }
 
-.errorMessage {
-    color: red;
-    text-align: center;
-}
-
-.formGroup {
-    margin-bottom: 15px;
-}
-
-.label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
+.form {
+    display: flex;
+    flex-direction: column;
 }
 
 .input {
     width: 100%;
     padding: 8px;
+    margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
 }
@@ -44,6 +37,11 @@
     cursor: pointer;
 }
 
-.button:hover {
+.buttonHover:hover {
     background-color: #357ab7;
+}
+
+.errorMessage {
+    color: red;
+    text-align: center;
 }
