@@ -1,7 +1,8 @@
 // src/components/Header.js
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { checkAuth, logout } from '../utils/auth';
 
 const HeaderContainer = styled.header`
   background: #4a90e2;
@@ -27,15 +28,43 @@ const NavLink = styled(Link)`
 `;
 
 const Header = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate(); // Для редиректа после выхода
+
+    useEffect(() => {
+        const checkUserAuth = async () => {
+            const authStatus = await checkAuth();
+            setIsAuthenticated(authStatus);
+        };
+        checkUserAuth();
+    }, []);
+
+    const handleLogout = async () => {
+        const success = await logout();
+        if (success) {
+            setIsAuthenticated(false);
+            navigate('/'); // Перенаправление на главную страницу после выхода
+        }
+    };
+
     return (
         <HeaderContainer>
             <h1 style={{ color: 'white' }}>My App</h1>
             <Nav>
                 <NavLink to="/">Home</NavLink>
                 <NavLink to="/cart">Корзина</NavLink>
-                <NavLink to="/register">Регистр</NavLink>
-                <NavLink to="/login">Логин</NavLink>
 
+                {isAuthenticated ? (
+                    <>
+                        <NavLink to="/order">Заказ</NavLink>
+                        <NavLink to="#" onClick={handleLogout}>Выйти</NavLink>
+                    </>
+                ) : (
+                    <>
+                        <NavLink to="/register">Регистр</NavLink>
+                        <NavLink to="/login">Логин</NavLink>
+                    </>
+                )}
             </Nav>
         </HeaderContainer>
     );

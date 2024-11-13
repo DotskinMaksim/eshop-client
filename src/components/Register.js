@@ -1,6 +1,6 @@
-// components/Register.js
 import React, { useState } from 'react';
 import axios from 'axios';
+import styles from './Register.module.css';
 
 const Register = ({ onSuccess }) => {
     const [userName, setUserName] = useState('');
@@ -18,54 +18,58 @@ const Register = ({ onSuccess }) => {
                 firstName,
                 lastName,
             });
-            onSuccess(response.data); // Callback on successful registration
+            onSuccess(response.data);
         } catch (err) {
             setError(err.response ? err.response.data : 'An error occurred.');
         }
     };
 
     return (
-        <div>
-            <h2>Регистрация</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className={styles.container}>
+            <h2 className={styles.heading}>Регистрация</h2>
+            {error && <p className={styles.errorMessage}>{error}</p>}
             <form onSubmit={handleRegister}>
-                <div>
-                    <label>Имя пользователя</label>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Имя пользователя</label>
                     <input
                         type="text"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         required
+                        className={styles.input}
                     />
                 </div>
-                <div>
-                    <label>Пароль</label>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Пароль</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        className={styles.input}
                     />
                 </div>
-                <div>
-                    <label>Имя</label>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Имя</label>
                     <input
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
+                        className={styles.input}
                     />
                 </div>
-                <div>
-                    <label>Фамилия</label>
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Фамилия</label>
                     <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
+                        className={styles.input}
                     />
                 </div>
-                <button type="submit">Зарегистрироваться</button>
+                <button type="submit" className={styles.button}>Зарегистрироваться</button>
             </form>
         </div>
     );
