@@ -15,27 +15,32 @@ const LoginPage = ({ login }) => {
         }
     }, [navigate]);
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
+   const handleLogin = async (e) => {
+    e.preventDefault();
 
-        const response = await fetch('https://localhost:7188/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userName: username, password: password }),
-            credentials: 'include',
-        });
+    const response = await fetch('https://localhost:7188/api/auth/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userName: username, password: password }),
+    });
 
-        if (response.ok) {
+    if (response.ok) {
+        const data = await response.json();
+        const userId = data.userId; // Получаем ID пользователя из ответа
+
+        if (userId) {
+            localStorage.setItem('authToken', userId); // Сохраняем ID пользователя в localStorage
             login(); // Вызов родительской функции для обновления состояния
-            localStorage.setItem('authToken', 'user-token'); // Пример сохранения токена
             navigate('/'); // Перенаправление на главную
         } else {
-            setError('Invalid username or password.');
+            setError('Failed to retrieve user ID.');
         }
-    };
-
+    } else {
+        setError('Invalid username or password.');
+    }
+};
     return (
         <div className={styles.container}>
             <h2 className={styles.heading}>Login</h2>
@@ -57,6 +62,7 @@ const LoginPage = ({ login }) => {
                     className={styles.input}
                 />
                 <button type="submit" className={styles.button}>Login</button>
+                <a href="register">Register</a>
             </form>
             {error && <p className={styles.errorMessage}>{error}</p>}
         </div>

@@ -90,6 +90,8 @@ const RegisterPage = () => {
                 />
 
                 <button type="submit" className={styles.button}>Register</button>
+                <a href="login">Log in</a>
+
             </form>
             {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
