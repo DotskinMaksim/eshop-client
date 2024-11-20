@@ -9,7 +9,7 @@ const LoginPage = ({ login }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('userId');
         if (token) {
             navigate('/'); // Перенаправление на главную, если уже авторизован
         }
@@ -31,7 +31,7 @@ const LoginPage = ({ login }) => {
         const userId = data.userId; // Получаем ID пользователя из ответа
 
         if (userId) {
-            localStorage.setItem('authToken', userId); // Сохраняем ID пользователя в localStorage
+            localStorage.setItem('userId', userId); // Сохраняем ID пользователя в localStorage
             login(); // Вызов родительской функции для обновления состояния
             navigate('/'); // Перенаправление на главную
         } else {

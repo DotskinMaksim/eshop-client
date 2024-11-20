@@ -32,7 +32,7 @@ const CartPage = ({ cartItems, removeFromCart, updateQuantity, isAuthenticated }
     };
 
  const handleOrderClick = async () => {
-    const userId = localStorage.getItem('authToken'); // Получаем ID пользователя из localStorage
+    const userId = localStorage.getItem('userId'); // Получаем ID пользователя из localStorage
     if (!userId) {
         console.error('User is not authenticated');
         return;

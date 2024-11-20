@@ -2,7 +2,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
-import OrderPage from './pages/OrderPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Header from './components/Header';
@@ -76,7 +75,6 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<HomePage addToCart={addToCart} />} />
                 <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} isAuthenticated={isAuthenticated} />} />
-                <Route path="/order" element={<OrderPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/login" element={<LoginPage login={login} />} />
             </Routes>

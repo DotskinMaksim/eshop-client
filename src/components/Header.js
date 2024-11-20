@@ -45,7 +45,6 @@ const Header = ({ isAuthenticated, logout }) => {
                 <NavLink to="/cart">Корзина</NavLink>
                 {isAuthenticated ? (
                     <>
-                        <NavLink to="/order">Заказ</NavLink>
                         <NavLink to="#" onClick={handleLogout}>Выйти</NavLink>
                     </>
                 ) : (
