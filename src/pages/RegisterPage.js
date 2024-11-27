@@ -13,16 +13,16 @@ const RegisterPage = () => {
     useEffect(() => {
         const token = localStorage.getItem('authToken');
         if (token) {
-            navigate('/'); // Перенаправление на главную, если уже авторизован
+            navigate('/'); // Ümber suunamine, kui juba sisse logitud
         }
     }, [navigate]);
 
     const handleRegister = async (e) => {
         e.preventDefault();
 
-        // Проверка на совпадение паролей
+        // Paroolide kokkulangevuse kontroll
         if (password !== confirmPassword) {
-            setError('Passwords do not match.');
+            setError('Paroolid ei kattu.');
             return;
         }
 
@@ -35,32 +35,30 @@ const RegisterPage = () => {
             credentials: 'include',
         });
 
-        // Проверка статуса ответа и типов контента
+        // Kontrollige vastuse staatust ja sisu tüüpe
         if (response.ok) {
             try {
-                const data = await response.json();  // Парсим только если ответ успешен
-                navigate('/login'); // Перенаправление на страницу логина после успешной регистрации
+                const data = await response.json();  // Parssime ainult siis, kui vastus on edukas
+                navigate('/login'); // Ümber suunamine pärast edukat registreerimist
             } catch (e) {
-                // Логирование ошибки для диагностики
-                setError('Failed to parse response as JSON: ' + e.message);
+                // Vigade logimine diagnostika jaoks
+                setError('Ei õnnestunud vastust JSON-i formaadis parssida: ' + e.message);
             }
         } else {
             const errorText = await response.text();
-            setError(errorText || 'Registration failed.');
+            setError(errorText || 'Registreerimine ebaõnnestus.');
         }
     };
 
-
-
     return (
         <div className={styles.container}>
-            <h2 className={styles.heading}>Register</h2>
+            <h2 className={styles.heading}>Registreeri</h2>
             <form onSubmit={handleRegister} className={styles.form}>
                 <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder="Kasutajanimi"
                     required
                     className={styles.input}
                 />
@@ -68,7 +66,7 @@ const RegisterPage = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
+                    placeholder="E-post"
                     required
                     className={styles.input}
                 />
@@ -76,7 +74,7 @@ const RegisterPage = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder="Parool"
                     required
                     className={styles.input}
                 />
@@ -84,14 +82,13 @@ const RegisterPage = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password"
+                    placeholder="Kinnita parool"
                     required
                     className={styles.input}
                 />
 
-                <button type="submit" className={styles.button}>Register</button>
-                <a href="login">Log in</a>
-
+                <button type="submit" className={styles.button}>Registreeri</button>
+                <a href="login">Logi sisse</a>
             </form>
             {error && <p className={styles.errorMessage}>{error}</p>}
         </div>

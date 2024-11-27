@@ -5,12 +5,14 @@ import CartPage from './pages/CartPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Header from './components/Header';
+import OrderHistoryPage from './pages/OrderHistoryPage';
 
 const App = () => {
     const [cartItems, setCartItems] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userId, setUserId] = useState(null); // Lisame userId
 
-    // Загружаем корзину из localStorage при старте
+    // Laadime ostukorvi ja autentimise kontrolli
     useEffect(() => {
         const storedCart = JSON.parse(localStorage.getItem('cartItems'));
         if (storedCart) {
@@ -18,26 +20,35 @@ const App = () => {
         }
         const token = localStorage.getItem('authToken');
         setIsAuthenticated(!!token);
+
+        if (token) {
+            const storedUserId = localStorage.getItem('userId'); // Laadime userId
+            setUserId(storedUserId); // Seame userId
+        }
     }, []);
 
-    // Сохраняем корзину в localStorage при изменении cartItems
+    // Salvestame ostukorvi localStorage'i, kui cartItems muutuvad
     useEffect(() => {
         if (cartItems.length > 0) {
             localStorage.setItem('cartItems', JSON.stringify(cartItems));
         }
     }, [cartItems]);
 
-    // Функция для авторизации пользователя
+    // Funktsioon kasutaja autentimiseks
     const login = () => {
         localStorage.setItem('authToken', 'user-token');
+        localStorage.setItem('userId', 1); // Näide userId
         setIsAuthenticated(true);
+        setUserId(1); // Seame userId sisselogimise ajal
     };
 
     const logout = () => {
         localStorage.removeItem('authToken');
-        localStorage.removeItem('cartItems');  // Очистка корзины из localStorage
+        localStorage.removeItem('userId');
+        localStorage.removeItem('cartItems');
         setIsAuthenticated(false);
-        setCartItems([]);  // Очистка состояния корзины
+        setCartItems([]);
+        setUserId(null); // Eemaldame userId välja logides
     };
 
     const addToCart = (product) => {
@@ -75,8 +86,12 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<HomePage addToCart={addToCart} />} />
                 <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} isAuthenticated={isAuthenticated} />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route
+                    path="/register"
+                    element={<RegisterPage setIsAuthenticated={setIsAuthenticated} />}
+                />
                 <Route path="/login" element={<LoginPage login={login} />} />
+                <Route path="/order-history" element={<OrderHistoryPage userId={userId} />} /> {/* Anname userId */}
             </Routes>
         </Router>
     );

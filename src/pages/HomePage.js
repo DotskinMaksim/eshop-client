@@ -1,11 +1,11 @@
 import React from 'react';
 import ProductsList from '../components/ProductList';
 
-const HomePage = ({ addToCart }) => { // Добавляем props
+const HomePage = ({ addToCart }) => {
     return (
         <div className="home-page">
-            <h1>Products review</h1>
-            <ProductsList addToCart={addToCart} /> {/* Передаем addToCart */}
+            <h1>Toodete ülevaade</h1>
+            <ProductsList addToCart={addToCart} />
         </div>
     );
 };

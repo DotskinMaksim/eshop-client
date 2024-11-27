@@ -33,24 +33,25 @@ const Header = ({ isAuthenticated, logout }) => {
     const handleLogout = async () => {
         const success = await logout();
         if (success) {
-            navigate('/'); // Перенаправляем на главную страницу после выхода
+            navigate('/'); // Suunatakse pärast väljalogimist avalehele
         }
     };
 
     return (
         <HeaderContainer>
-            <h1 style={{ color: 'white' }}>My App</h1>
+            <h1 style={{ color: 'white' }}>Minu Rakendus</h1> {/* "My App" on tõlgitud kui "Minu Rakendus" */}
             <Nav>
-                <NavLink to="/">Home</NavLink>
-                <NavLink to="/cart">Корзина</NavLink>
+                <NavLink to="/">Avaleht</NavLink> {/* "Home" → "Avaleht" */}
+                <NavLink to="/cart">Ostukorv</NavLink> {/* "Корзина" → "Ostukorv" */}
                 {isAuthenticated ? (
                     <>
-                        <NavLink to="#" onClick={handleLogout}>Выйти</NavLink>
+                        <NavLink to="/order-history">Tellimuste ajalugu</NavLink> {/* "История заказов" → "Tellimuste ajalugu" */}
+                        <NavLink to="#" onClick={handleLogout}>Logi välja</NavLink> {/* "Выйти" → "Logi välja" */}
                     </>
                 ) : (
                     <>
-                        <NavLink to="/register">Регистр</NavLink>
-                        <NavLink to="/login">Логин</NavLink>
+                        <NavLink to="/register">Registreeru</NavLink> {/* "Регистр" → "Registreeru" */}
+                        <NavLink to="/login">Logi sisse</NavLink> {/* "Логин" → "Logi sisse" */}
                     </>
                 )}
             </Nav>

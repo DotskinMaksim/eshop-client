@@ -11,45 +11,46 @@ const LoginPage = ({ login }) => {
     useEffect(() => {
         const token = localStorage.getItem('userId');
         if (token) {
-            navigate('/'); // Перенаправление на главную, если уже авторизован
+            navigate('/'); // Ümber suunamine, kui juba sisse logitud
         }
     }, [navigate]);
 
-   const handleLogin = async (e) => {
-    e.preventDefault();
+    const handleLogin = async (e) => {
+        e.preventDefault();
 
-    const response = await fetch('https://localhost:7188/api/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userName: username, password: password }),
-    });
+        const response = await fetch('https://localhost:7188/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userName: username, password: password }),
+        });
 
-    if (response.ok) {
-        const data = await response.json();
-        const userId = data.userId; // Получаем ID пользователя из ответа
+        if (response.ok) {
+            const data = await response.json();
+            const userId = data.userId; // Kasutaja ID saadakse vastusest
 
-        if (userId) {
-            localStorage.setItem('userId', userId); // Сохраняем ID пользователя в localStorage
-            login(); // Вызов родительской функции для обновления состояния
-            navigate('/'); // Перенаправление на главную
+            if (userId) {
+                localStorage.setItem('userId', userId); // Salvestame kasutaja ID localStorage
+                login(); // Kutsume vanema funktsiooni, et värskendada seisundit
+                navigate('/'); // Ümber suunamine peale sisse logimist
+            } else {
+                setError('Kasutaja ID-d ei leitud.');
+            }
         } else {
-            setError('Failed to retrieve user ID.');
+            setError('Vale kasutajanimi või parool.');
         }
-    } else {
-        setError('Invalid username or password.');
-    }
-};
+    };
+
     return (
         <div className={styles.container}>
-            <h2 className={styles.heading}>Login</h2>
+            <h2 className={styles.heading}>Logi sisse</h2>
             <form onSubmit={handleLogin} className={styles.form}>
                 <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder="Kasutajanimi"
                     required
                     className={styles.input}
                 />
@@ -57,12 +58,12 @@ const LoginPage = ({ login }) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder="Parool"
                     required
                     className={styles.input}
                 />
-                <button type="submit" className={styles.button}>Login</button>
-                <a href="register">Register</a>
+                <button type="submit" className={styles.button}>Logi sisse</button>
+                <a href="register">Registreeru</a>
             </form>
             {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
