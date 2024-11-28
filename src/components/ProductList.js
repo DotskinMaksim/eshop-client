@@ -91,33 +91,47 @@ const AddToCartButton = styled.button`
   }
 `;
 
+const SuccessMessage = styled.p`
+  color: green;
+  font-size: 14px;
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f0fff0;
+  padding: 5px 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+`;
+
 const ProductList = ({ addToCart }) => {
-    const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [successMessages, setSuccessMessages] = useState({});
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch('https://localhost:7188/api/products/withtax');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch products');
-                }
-                const data = await response.json();
-                const initializedProducts = data.map(product => ({
-                    ...product,
-                    amount: 1
-                }));
-                setProducts(initializedProducts);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('https://localhost:7188/api/products/withtax');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        const initializedProducts = data.map((product) => ({
+          ...product,
+          amount: 1,
+        }));
+        setProducts(initializedProducts);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-        fetchProducts();
-    }, []);
+    fetchProducts();
+  }, []);
 
-    const updateAmount = (id, newAmount) => {
-    setProducts(prevProducts =>
-      prevProducts.map(product =>
+  const updateAmount = (id, newAmount) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
         product.id === id && newAmount <= product.amountInStock
           ? { ...product, amount: newAmount }
           : product
@@ -125,70 +139,99 @@ const ProductList = ({ addToCart }) => {
     );
   };
 
-    const handleAddToCart = (product) => {
-        let productAdd = { ...product };
+ const handleAddToCart = (product) => {
+  let productAdd = { ...product };
 
-        if (productAdd.hasBottle) {
-            productAdd.pricePerUnit += 0.10;
-        }
+  if (productAdd.hasBottle) {
+    productAdd.pricePerUnit += 0.10;
+  }
 
-        addToCart({
-            ...productAdd,
-            quantity: productAdd.amount,
-            price: productAdd.pricePerUnit,
-        });
+  addToCart({
+    ...productAdd,
+    quantity: productAdd.amount,
+    price: productAdd.pricePerUnit,
+  })
+    .then(() => {
+      // Если товар добавлен в корзину без ошибок, показываем сообщение
+      setSuccessMessages((prevMessages) => ({
+        ...prevMessages,
+        [product.id]: true,
+      }));
 
-        setProducts((prevProducts) =>
-            prevProducts.map((p) =>
-                p.id === product.id ? { ...p, amount: 1 } : p
-            )
-        );
-    };
+      setTimeout(() => {
+        setSuccessMessages((prevMessages) => ({
+          ...prevMessages,
+          [product.id]: false,
+        }));
+      }, 2000);
 
-    return (
-        <ProductListContainer>
-            {products.map((product) => (
-                <ProductCard key={product.id}>
-                    <ProductImage src={product.imageUrl} alt={product.name} />
-                    <ProductName>{product.name}</ProductName>
-                    <ProductPrice>
-                        €
-                        {(product.pricePerUnit + (product.hasBottle ? 0.10 : 0)).toFixed(2)}
-                        {product.unit === "kg" ? "/kg" : ""}
-                    </ProductPrice>
-                    <QuantitySelector>
-                        {product.unit === "kg" ? (
-                            <>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    min="0.1"
-                                    value={product.amount}
-                                    onChange={(e) => updateAmount(product.id, parseFloat(e.target.value))}
-                                />
-                                <span>kg</span>
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() => updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)}
-                                    disabled={product.amount <= 1}
+      // Сброс количества к 1
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p.id === product.id ? { ...p, amount: 1 } : p
+        )
+      );
+    })
+    .catch((errorMessage) => {
+      // Если возникла ошибка (например, недостаточно товара на складе)
+      alert(errorMessage);
+    });
+};
 
-                                >-</button>
-                                <p>{product.amount}</p>
-                                <button
-                                    onClick={() => updateAmount(product.id, product.amount + 1)}
-                                    disabled={product.amount >= product.amountInStock}
-
-                                >+</button>
-                            </>
-                        )}
-                    </QuantitySelector>
-                    <AddToCartButton onClick={() => handleAddToCart(product)}>Lisa ostukorvi</AddToCartButton>
-                </ProductCard>
-            ))}
-        </ProductListContainer>
-    );
+  return (
+    <ProductListContainer>
+      {products.map((product) => (
+        <ProductCard key={product.id}>
+          <ProductImage src={product.imageUrl} alt={product.name} />
+          <ProductName>{product.name}</ProductName>
+          <ProductPrice>
+            €
+            {(product.pricePerUnit )}
+            {product.unit === 'kg' ? ' /kg' : ''}
+            {product.hasBottle  ? ' + 0.10' : ''}
+          </ProductPrice>
+          <QuantitySelector>
+            {product.unit === 'kg' ? (
+              <>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  value={product.amount}
+                  onChange={(e) =>
+                    updateAmount(product.id, parseFloat(e.target.value))
+                  }
+                />
+                <span>kg</span>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() =>
+                    updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)
+                  }
+                  disabled={product.amount <= 1}
+                >
+                  -
+                </button>
+                <p>{product.amount}</p>
+                <button
+                  onClick={() => updateAmount(product.id, product.amount + 1)}
+                  disabled={product.amount >= product.amountInStock}
+                >
+                  +
+                </button>
+              </>
+            )}
+          </QuantitySelector>
+          {successMessages[product.id] && (
+            <SuccessMessage>Добавлено в корзину</SuccessMessage>
+          )}
+          <AddToCartButton onClick={() => handleAddToCart(product)}>Добавить в корзину</AddToCartButton>
+        </ProductCard>
+      ))}
+    </ProductListContainer>
+  );
 };
 
 export default ProductList;

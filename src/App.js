@@ -55,26 +55,29 @@ const App = () => {
         setUserId(null); // Eemaldame userId välja logides
     };
 
-   const addToCart = (product) => {
-    setCartItems((prevItems) => {
-        const existingItem = prevItems.find((item) => item.id === product.id);
+  const addToCart = (product) => {
+    return new Promise((resolve, reject) => {
+        setCartItems((prevItems) => {
+            const existingItem = prevItems.find((item) => item.id === product.id);
 
-        const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
+            const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
 
-        if (totalQuantityInCart > product.amountInStock) {
-            alert(`Нельзя добавить товар в корзину. В наличии осталось только ${product.amountInStock - (existingItem?.quantity || 0)} единиц.`);
-            return prevItems;
-        }
+            if (totalQuantityInCart > product.amountInStock) {
+                reject(`Нельзя добавить товар в корзину. В наличии осталось только ${product.amountInStock - (existingItem?.quantity || 0)} единиц.`);
+                return prevItems;
+            }
 
-        if (existingItem) {
-            return prevItems.map((item) =>
-                item.id === product.id
-                    ? { ...item, quantity: totalQuantityInCart }
-                    : item
-            );
-        }
+            if (existingItem) {
+                return prevItems.map((item) =>
+                    item.id === product.id
+                        ? { ...item, quantity: totalQuantityInCart }
+                        : item
+                );
+            }
 
-        return [...prevItems, { ...product, quantity: product.quantity }];
+            return [...prevItems, { ...product, quantity: product.quantity }];
+        });
+        resolve();
     });
 };
 
@@ -95,7 +98,7 @@ const App = () => {
         }
 
         if (newQuantity > existingItem.amountInStock) {
-            alert(`Вы не можете установить количество больше доступного. В наличии осталось только ${existingItem.amountInStock} единиц.`);
+            alert(`Вы не можете установить количество больше доступного. В наличии осталось только ${existingItem.amountInStock - (existingItem?.quantity || 0)} единиц.`);
             return prevItems; // Если превышен лимит, не изменяем количество
         }
 
