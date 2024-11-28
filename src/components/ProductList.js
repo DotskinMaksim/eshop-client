@@ -75,6 +75,12 @@ const QuantitySelector = styled.div`
   }
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+`;
+
 const AddToCartButton = styled.button`
   background-color: #4caf50;
   color: white;
@@ -92,95 +98,129 @@ const AddToCartButton = styled.button`
 `;
 
 const ProductList = ({ addToCart }) => {
-    const [products, setProducts] = useState([]);
+  const API_URL = process.env.REACT_APP_API_URL;
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch('https://localhost:7188/api/products/withtax');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch products');
-                }
-                const data = await response.json();
-                const initializedProducts = data.map(product => ({
-                    ...product,
-                    amount: 1
-                }));
-                setProducts(initializedProducts);
-            } catch (error) {
-                console.error(error);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${API_URL}/products/withtax`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        const initializedProducts = data.map((product) => ({
+          ...product,
+          amount: 1,
+          errorMessage: '',
+        }));
+        setProducts(initializedProducts);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const updateAmount = (id, newAmount) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === id
+          ? {
+              ...product,
+              amount: Math.min(newAmount, product.amountInStock), // Ограничиваем количество по складу
+              errorMessage: newAmount > product.amountInStock ? 'Недостаточно товара на складе' : '',
             }
-        };
-
-        fetchProducts();
-    }, []);
-
-    const updateAmount = (id, newAmount) => {
-        if (newAmount > 0) {
-            setProducts((prevProducts) =>
-                prevProducts.map((product) =>
-                    product.id === id ? { ...product, amount: newAmount } : product
-                )
-            );
-        }
-    };
-
-    const handleAddToCart = (product) => {
-        let productAdd = { ...product };
-
-        if (productAdd.hasBottle) {
-            productAdd.pricePerUnit += 0.10;
-        }
-
-        addToCart({
-            ...productAdd,
-            quantity: productAdd.amount,
-            price: productAdd.pricePerUnit,
-        });
-
-        setProducts((prevProducts) =>
-            prevProducts.map((p) =>
-                p.id === product.id ? { ...p, amount: 1 } : p
-            )
-        );
-    };
-
-    return (
-        <ProductListContainer>
-            {products.map((product) => (
-                <ProductCard key={product.id}>
-                    <ProductImage src={product.imageUrl} alt={product.name} />
-                    <ProductName>{product.name}</ProductName>
-                    <ProductPrice>
-                        €
-                        {(product.pricePerUnit + (product.hasBottle ? 0.10 : 0)).toFixed(2)}
-                        {product.unit === "kg" ? "/kg" : ""}
-                    </ProductPrice>
-                    <QuantitySelector>
-                        {product.unit === "kg" ? (
-                            <>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    min="0.1"
-                                    value={product.amount}
-                                    onChange={(e) => updateAmount(product.id, parseFloat(e.target.value))}
-                                />
-                                <span>kg</span>
-                            </>
-                        ) : (
-                            <>
-                                <button onClick={() => updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)}>-</button>
-                                <p>{product.amount}</p>
-                                <button onClick={() => updateAmount(product.id, product.amount + 1)}>+</button>
-                            </>
-                        )}
-                    </QuantitySelector>
-                    <AddToCartButton onClick={() => handleAddToCart(product)}>Lisa ostukorvi</AddToCartButton>
-                </ProductCard>
-            ))}
-        </ProductListContainer>
+          : product
+      )
     );
+  };
+
+  const handleAddToCart = (product) => {
+    if (product.amount > product.amountInStock) {
+      setProducts((prevProducts) =>
+        prevProducts.map((p) =>
+          p.id === product.id ? { ...p, errorMessage: 'Выбранное количество превышает доступное на складе!' } : p
+        )
+      );
+      return;
+    }
+
+    let productAdd = { ...product };
+
+    if (productAdd.hasBottle) {
+      productAdd.pricePerUnit += 0.10;
+    }
+
+    addToCart({
+      ...productAdd,
+      quantity: productAdd.amount,
+      price: productAdd.pricePerUnit,
+    });
+
+    setProducts((prevProducts) =>
+      prevProducts.map((p) =>
+        p.id === product.id ? { ...p, amount: 1, errorMessage: '' } : p // Сбрасываем сообщение об ошибке
+      )
+    );
+  };
+
+  return (
+    <ProductListContainer>
+      {products.map((product) => (
+        <ProductCard key={product.id}>
+          <ProductImage src={product.imageUrl} alt={product.name} />
+          <ProductName>{product.name}</ProductName>
+          <ProductPrice>
+            €
+            {(product.pricePerUnit + (product.hasBottle ? 0.10 : 0)).toFixed(2)}
+            {product.unit === 'kg' ? '/kg' : ''}
+          </ProductPrice>
+          <QuantitySelector>
+            {product.unit === 'kg' ? (
+              <>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  value={product.amount}
+                  onChange={(e) => updateAmount(product.id, parseFloat(e.target.value))}
+                />
+                <span>kg</span>
+              </>
+            ) : (
+              <>
+                <button onClick={() => updateAmount(product.id, Math.max(product.amount - 1, 1))}>-</button>
+                <p>{product.amount}</p>
+                <button
+                  onClick={() => {
+                    const newAmount = product.amount + 1;
+                    updateAmount(product.id, newAmount);
+                    if (newAmount > product.amountInStock) {
+                      setProducts((prevProducts) =>
+                        prevProducts.map((p) =>
+                          p.id === product.id
+                            ? { ...p, errorMessage: 'Вы не можете выбрать больше, чем есть на складе!' }
+                            : p
+                        )
+                      );
+                    }
+                  }}
+                  disabled={product.amount >= product.amountInStock}
+                >
+                  +
+                </button>
+              </>
+            )}
+          </QuantitySelector>
+          {product.errorMessage && <ErrorMessage>{product.errorMessage}</ErrorMessage>}
+          <AddToCartButton onClick={() => handleAddToCart(product)}>Добавить в корзину</AddToCartButton>
+        </ProductCard>
+      ))}
+    </ProductListContainer>
+  );
 };
 
 export default ProductList;

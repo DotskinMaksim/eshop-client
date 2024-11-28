@@ -7,10 +7,14 @@ import LoginPage from './pages/LoginPage';
 import Header from './components/Header';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 
+
 const App = () => {
     const [cartItems, setCartItems] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userId, setUserId] = useState(null); // Lisame userId
+
+    const API_URL = process.env.REACT_APP_API_URL;
+
 
     // Laadime ostukorvi ja autentimise kontrolli
     useEffect(() => {
@@ -85,7 +89,18 @@ const App = () => {
             />
             <Routes>
                 <Route path="/" element={<HomePage addToCart={addToCart} />} />
-                <Route path="/cart" element={<CartPage cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} isAuthenticated={isAuthenticated} />} />
+                <Route
+                  path="/cart"
+                  element={
+                    <CartPage
+                      cartItems={cartItems}
+                      removeFromCart={removeFromCart}
+                      updateQuantity={updateQuantity}
+                      setCartItems={setCartItems}
+                      isAuthenticated={isAuthenticated}
+                    />
+                  }
+                />
                 <Route
                     path="/register"
                     element={<RegisterPage setIsAuthenticated={setIsAuthenticated} />}

@@ -8,6 +8,8 @@ const LoginPage = ({ login }) => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    const API_URL = process.env.REACT_APP_API_URL;
+
     useEffect(() => {
         const token = localStorage.getItem('userId');
         if (token) {
@@ -18,7 +20,7 @@ const LoginPage = ({ login }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const response = await fetch('https://localhost:7188/api/auth/login', {
+        const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

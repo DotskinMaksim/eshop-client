@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Cart from '../components/Cart';
+import { useNavigate } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -37,57 +38,28 @@ const ModalContent = styled.div`
   width: 400px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-  h3 {
-    margin-bottom: 20px;
-    font-size: 18px;
-  }
-
-  button {
-    margin: 10px 0;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;  /* Make buttons the same width */
-    font-size: 16px;
-
-    &:hover {
-      opacity: 0.8;
-    }
-  }
 `;
 
-const ConfirmButton = styled.button`
+const ConfirmButton = styled(Button)`
   background-color: #4caf50;
-  color: white;
 
   &:hover {
     background-color: #45a049;
   }
 `;
 
-const CancelButton = styled.button`
+const CancelButton = styled(Button)`
   background-color: #f44336;
-  color: white;
 
   &:hover {
     background-color: #e53935;
   }
 `;
-
-const LoginPrompt = styled.div`
+const OrderBtnDiv = styled.div`
   margin-left: 20px;
   font-size: 16px;
   color: #555;
 `;
-
-const OrderDiv = styled.div`
-  margin-left: 20px;
-  font-size: 16px;
-  color: #555;
-`;
-
 const StyledNavLink = styled(NavLink)`
   color: #2196f3;
   text-decoration: none;
@@ -97,117 +69,151 @@ const StyledNavLink = styled(NavLink)`
     text-decoration: underline;
   }
 `;
+const CartPage = ({ cartItems, removeFromCart, updateQuantity, setCartItems, isAuthenticated  }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState('');
+  const navigate = useNavigate();
 
-const CartPage = ({ cartItems, removeFromCart, updateQuantity, isAuthenticated }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
+  const API_URL = process.env.REACT_APP_API_URL;
+  const createOrder = async (cartItems, calculateTotal, setIsProcessing, setIsModalOpen) => {
+  setIsProcessing(true);
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const calculateTotal = () => {
-        return cartItems.reduce((total, item) => total + item.pricePerUnit * item.quantity, 0).toFixed(2);
-    };
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    console.error('Kasutaja ei ole autentitud');
+    setIsProcessing(false);
+    return;
+  }
 
-    const getPayment = async () => {
-        const totalAmount = calculateTotal();
+  const totalAmount = calculateTotal();
+  const orderData = {
+    totalPrice: parseFloat(totalAmount),
+    orderItems: cartItems.map((item) => ({
+      productId: item.id,
+      quantity: item.quantity,
+    })),
+  };
 
+  try {
+    const response = await fetch(`${API_URL}/orders?userId=${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    });
+
+    const data = await response.json();
+    if (data.order) {
+      console.log('Tellimus loodud edukalt:', data.order);
+    } else {
+      console.error('Viga tellimuse loomisel');
+    }
+  } catch (error) {
+    console.error('Viga tellimuse töötlemisel:', error);
+  }
+  };
+
+  const calculateTotal = () => {
+    return cartItems.reduce((total, item) => total + item.pricePerUnit * item.quantity, 0).toFixed(2);
+  };
+
+  const handlePayment = async () => {
+    const totalAmount = calculateTotal();
+    let paymentWindow = null;
+    try {
+      const response = await fetch(`${API_URL}/Payment/${totalAmount}`);
+      if (!response.ok) throw new Error('Payment initiation failed');
+
+      const link = await response.json();
+      paymentWindow = window.open(link, '_blank');
+      setIsProcessing(true);
+      setIsModalOpen(true);
+
+      const intervalId = setInterval(async () => {
         try {
-            const response = await fetch(`https://localhost:7188/api/Payment/${totalAmount}`);
-            const data = await response.json();
+          const statusResponse = await fetch(link);
+          const status = await statusResponse.json();
 
-            console.log('API Response:', data);
+          if (status.state === 'completed') {
+              await createOrder(cartItems, calculateTotal, setIsProcessing, setIsModalOpen);
 
-            if (data.paymentLink) {
-                window.open(data.paymentLink, '_blank');
-            } else {
-                console.error('Makselink ei laetud');
-            }
-        } catch (error) {
-            console.error('Viga makseprotsessis:', error);
-        }
-    };
-
-    const handleOrderClick = () => {
-        setIsModalOpen(true);
-        getPayment();
-    };
-
-    const handleConfirmPayment = async () => {
-        setIsProcessing(true);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        const userId = localStorage.getItem('userId');
-        if (!userId) {
-            console.error('Kasutaja ei ole autentitud');
+            clearInterval(intervalId);
+            paymentWindow?.close();
             setIsProcessing(false);
-            return;
-        }
+            setCartItems([]);
+            localStorage.removeItem('cartItems');
+            setPaymentStatus('success');
 
-        const totalAmount = calculateTotal();
-        const orderData = {
-            totalPrice: parseFloat(totalAmount),
-            orderItems: cartItems.map((item) => ({
-                productId: item.id,
-                quantity: item.quantity,
-            })),
-        };
-
-        try {
-            const response = await fetch(`https://localhost:7188/api/orders?userId=${userId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData),
-            });
-
-            const data = await response.json();
-            if (data.order) {
-                console.log('Tellimus loodud edukalt:', data.order);
-                localStorage.removeItem('cartItems');
-                setIsProcessing(false);
-                setIsModalOpen(false);
-                window.location.reload();
-            } else {
-                console.error('Viga tellimuse loomisel');
-            }
+          } else if (status.state === 'failed') {
+            clearInterval(intervalId);
+            paymentWindow?.close();
+            setIsProcessing(false);
+            setPaymentStatus('failed');
+            setTimeout(() => {
+              setIsModalOpen(false);
+              setPaymentStatus('');
+            }, 2000);
+          }
         } catch (error) {
-            console.error('Viga tellimuse töötlemisel:', error);
+          console.error('Error checking payment status:', error);
         }
-    };
+      }, 3000);
 
-    const handleCancelOrder = () => {
-        setIsModalOpen(false);
-    };
+      const handleCancelPayment = () => {
+        clearInterval(intervalId);
+        setIsProcessing(false);
+        paymentWindow?.close();
+        setPaymentStatus('failed');
+        setTimeout(() => {
+          setIsModalOpen(false);
+          setPaymentStatus('');
+        }, 2000);
+      };
 
-    return (
-        <div>
-            <Cart cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />
-            {cartItems.length > 0 && isAuthenticated && (
-                <OrderDiv>
-                    <Button onClick={handleOrderClick}>Telli</Button>
-                </OrderDiv>
+      return () => clearInterval(intervalId); // Удаление интервала при размонтировании компонента
+    } catch (error) {
+      console.error('Payment error:', error);
+      paymentWindow?.close();
+    }
+  };
+
+  return (
+    <div>
+      <Cart cartItems={cartItems} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />
+      {cartItems.length > 0 && isAuthenticated && (
+                <OrderBtnDiv>
+                    <Button onClick={handlePayment}>Telli</Button>
+                </OrderBtnDiv>
             )}
             {cartItems.length > 0 && !isAuthenticated && (
-                <LoginPrompt>
+                <OrderBtnDiv>
                     <p>Logige sisse, et tellida</p>
                     <StyledNavLink to="/login">Logi sisse</StyledNavLink>
-                </LoginPrompt>
+                </OrderBtnDiv>
             )}
 
-            {isModalOpen && (
-                <Modal>
-                    <ModalContent>
-                        {isProcessing ? (
-                            <p>Kontrollimine...</p>
-                        ) : (
-                            <>
-                                <h3>Tellimuse kinnitamine</h3>
-                                <ConfirmButton onClick={handleConfirmPayment}>Tellimus makstud</ConfirmButton>
-                                <CancelButton onClick={handleCancelOrder}>Tühista tellimus</CancelButton>
-                            </>
-                        )}
-                    </ModalContent>
-                </Modal>
+      {isModalOpen && (
+        <Modal>
+          <ModalContent>
+            {isProcessing ? (
+              <>
+                <p>Processing payment...</p>
+                <CancelButton onClick={() => setIsModalOpen(false)}>Cancel Payment</CancelButton>
+              </>
+            ) : paymentStatus === 'success' ? (
+              <>
+                <p>Payment successful! Order created.</p>
+                <ConfirmButton onClick={() => navigate('/')}>Go to Home</ConfirmButton>
+              </>
+            ) : paymentStatus === 'failed' && (
+              <p>Payment canceled.</p>
             )}
-        </div>
-    );
-};
+          </ModalContent>
+        </Modal>
+      )}
+    </div>
+  );
+  };
 
 export default CartPage;

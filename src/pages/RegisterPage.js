@@ -9,6 +9,7 @@ const RegisterPage = () => {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -26,7 +27,7 @@ const RegisterPage = () => {
             return;
         }
 
-        const response = await fetch('https://localhost:7188/api/auth/register', {
+        const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

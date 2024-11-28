@@ -7,10 +7,12 @@ const OrderHistoryPage = ({ userId }) => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    const API_URL = process.env.REACT_APP_API_URL;
+
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await fetch(`https://localhost:7188/api/orders/history/${userId}`);
+                const response = await fetch(`${API_URL}/orders/history/${userId}`);
                 if (!response.ok) {
                     throw new Error('Tellimuste laadimine ebaõnnestus');
                 }
