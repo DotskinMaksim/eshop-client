@@ -55,31 +55,55 @@ const App = () => {
         setUserId(null); // Eemaldame userId välja logides
     };
 
-    const addToCart = (product) => {
-        setCartItems((prevItems) => {
-            const existingItem = prevItems.find((item) => item.id === product.id);
-            if (existingItem) {
-                return prevItems.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + product.quantity }
-                        : item
-                );
-            }
-            return [...prevItems, { ...product, quantity: product.quantity }];
-        });
-    };
+   const addToCart = (product) => {
+    setCartItems((prevItems) => {
+        const existingItem = prevItems.find((item) => item.id === product.id);
 
-    const removeFromCart = (id) => {
-        setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-    };
+        const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
 
-    const updateQuantity = (id, newQuantity) => {
-        setCartItems((prevItems) =>
-            prevItems.map(item =>
-                item.id === id ? { ...item, quantity: newQuantity } : item
-            )
+        if (totalQuantityInCart > product.amountInStock) {
+            alert(`Нельзя добавить товар в корзину. В наличии осталось только ${product.amountInStock - (existingItem?.quantity || 0)} единиц.`);
+            return prevItems;
+        }
+
+        if (existingItem) {
+            return prevItems.map((item) =>
+                item.id === product.id
+                    ? { ...item, quantity: totalQuantityInCart }
+                    : item
+            );
+        }
+
+        return [...prevItems, { ...product, quantity: product.quantity }];
+    });
+};
+
+   const removeFromCart = (id) => {
+    setCartItems((prevItems) => {
+        const updatedItems = prevItems.filter((item) => item.id !== id);
+        localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+        return updatedItems;
+    });
+};
+
+   const updateQuantity = (id, newQuantity) => {
+    setCartItems((prevItems) => {
+        const existingItem = prevItems.find((item) => item.id === id);
+
+        if (!existingItem) {
+            return prevItems; // Если товар не найден, возвращаем корзину без изменений
+        }
+
+        if (newQuantity > existingItem.amountInStock) {
+            alert(`Вы не можете установить количество больше доступного. В наличии осталось только ${existingItem.amountInStock} единиц.`);
+            return prevItems; // Если превышен лимит, не изменяем количество
+        }
+
+        return prevItems.map((item) =>
+            item.id === id ? { ...item, quantity: newQuantity } : item
         );
-    };
+    });
+};
 
     return (
         <Router>
