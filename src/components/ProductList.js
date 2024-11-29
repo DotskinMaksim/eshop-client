@@ -132,15 +132,28 @@ const SuccessMessage = styled.p`
 
 const ProductList = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [successMessages, setSuccessMessages] = useState({});
   const [category, setCategory] = useState('');
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [cache, setCache] = useState({}); // Кэш для продуктов по категориям
+  const [cache, setCache] = useState({}); // Cache for products by category
   const quantityToLoad = 10;
-  const { t } = useTranslation();
-  const API_URL = process.env.REACT_APP_API_URL;
+const { t, i18n } = useTranslation();
+const API_URL = process.env.REACT_APP_API_URL;
 
+  // Fetch categories from the backend
+const fetchCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/products/categories?lang=${i18n.language}`);
+    if (!response.ok) throw new Error('Не удалось получить категории');
+    const data = await response.json();
+    setCategories(data);  // Сохраняем категории в state
+  } catch (error) {
+    console.error(error);
+  }
+};
+  // Fetch products by category
   const fetchProducts = async (append = false, currentOffset = 0, currentCategory = '') => {
     setIsLoading(true);
     try {
@@ -155,7 +168,7 @@ const ProductList = ({ addToCart }) => {
         amount: product.unit === 'kg' ? 0.1 : 1,
       }));
 
-      // Обновляем кэш
+      // Update cache
       setCache((prevCache) => ({
         ...prevCache,
         [currentCategory]: append
@@ -173,15 +186,17 @@ const ProductList = ({ addToCart }) => {
     }
   };
 
+    useEffect(() => {
+    fetchCategories();  // Загружаем категории при изменении языка
+    }, [i18n.language]); // Зависимость от языка
+
   useEffect(() => {
     if (cache[category]) {
-      // Если категория уже есть в кэше, загружаем из него
-      setProducts(cache[category]);
+      setProducts(cache[category]);  // Load products from cache
     } else {
-      // Если категории нет в кэше, делаем запрос
-      fetchProducts(false, 0, category);
+      fetchProducts(false, 0, category);  // Fetch products if not in cache
     }
-    setOffset(0); // Сбрасываем offset при смене категории
+    setOffset(0);  // Reset offset when category changes
   }, [category]);
 
   const updateAmount = (id, newAmount) => {
@@ -228,15 +243,17 @@ const ProductList = ({ addToCart }) => {
 
   return (
     <div>
-      <CategorySelector value={category} onChange={(e) => setCategory(e.target.value)}>
-        <option value="">{t('all_categories')}</option>
-        <option value="Juurviljad">{t('vegetables')}</option>
-        <option value="Puuviljad">{t('fruits')}</option>
-        <option value="Joogid">{t('drinks')}</option>
-        <option value="Piimatoodet">{t('dairy')}</option>
-        <option value="Snakid">{t('snacks')}</option>
-      </CategorySelector>
+      {/* Category Selector */}
+     <CategorySelector value={category} onChange={(e) => setCategory(e.target.value)}>
+  <option value="">{t('all_categories')}</option>
+  {categories.map((cat) => (
+    <option key={cat.id} value={cat.nameEn}>
+      {cat.name} {/* Отображаем название на выбранном языке */}
+    </option>
+  ))}
+</CategorySelector>
 
+      {/* Product List */}
       <ProductListContainer>
         {products.map((product) => (
           <ProductCard key={product.id}>
