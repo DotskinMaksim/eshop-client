@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 
@@ -74,6 +74,11 @@ const QuantitySelector = styled.div`
       background-color: #e0e0e0;
     }
   }
+
+  .slider {
+    width: 100%;
+    margin: 10px 0;
+  }
 `;
 
 const AddToCartButton = styled.button`
@@ -133,55 +138,50 @@ const ProductList = ({ addToCart }) => {
   }, []);
 
   const updateAmount = (id, newAmount) => {
-  setProducts((prevProducts) =>
-    prevProducts.map((product) => {
-      if (product.id === id) {
-        const adjustedAmount = Math.max(0.1, Math.min(newAmount, product.amountInStock));
-        return { ...product, amount: adjustedAmount };
-      }
-      return product;
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === id && newAmount <= product.amountInStock
+          ? { ...product, amount: newAmount }
+          : product
+      )
+    );
+  };
+
+  const handleAddToCart = (product) => {
+    let productAdd = { ...product };
+
+    if (productAdd.hasBottle) {
+      productAdd.pricePerUnit += 0.10;
+    }
+
+    addToCart({
+      ...productAdd,
+      quantity: productAdd.amount,
+      price: productAdd.pricePerUnit,
     })
-  );
-};
-
- const handleAddToCart = (product) => {
-  let productAdd = { ...product };
-
-  if (productAdd.hasBottle) {
-    productAdd.pricePerUnit += 0.10;
-  }
-
-  addToCart({
-    ...productAdd,
-    quantity: productAdd.amount,
-    price: productAdd.pricePerUnit,
-  })
-    .then(() => {
-      // Если товар добавлен в корзину без ошибок, показываем сообщение
-      setSuccessMessages((prevMessages) => ({
-        ...prevMessages,
-        [product.id]: true,
-      }));
-
-      setTimeout(() => {
+      .then(() => {
         setSuccessMessages((prevMessages) => ({
           ...prevMessages,
-          [product.id]: false,
+          [product.id]: true,
         }));
-      }, 2000);
 
-      // Сброс количества к 1
-      setProducts((prevProducts) =>
-        prevProducts.map((p) =>
-          p.id === product.id ? { ...p, amount: 1 } : p
-        )
-      );
-    })
-    .catch((errorMessage) => {
-      // Если возникла ошибка (например, недостаточно товара на складе)
-      alert(errorMessage);
-    });
-};
+        setTimeout(() => {
+          setSuccessMessages((prevMessages) => ({
+            ...prevMessages,
+            [product.id]: false,
+          }));
+        }, 2000);
+
+        setProducts((prevProducts) =>
+          prevProducts.map((p) =>
+            p.id === product.id ? { ...p, amount: 1 } : p
+          )
+        );
+      })
+      .catch((errorMessage) => {
+        alert(errorMessage);
+      });
+  };
 
   return (
     <ProductListContainer>
@@ -197,23 +197,47 @@ const ProductList = ({ addToCart }) => {
           </ProductPrice>
           <QuantitySelector>
             {product.unit === 'kg' ? (
-                <>
-                    <input
-                        type="number"
-                        step="0.1"
-                        min="0.1"
-                        value={product.amount}
-                        onChange={(e) =>
-                            updateAmount(product.id, parseFloat(e.target.value))
-                        }
-                    />
-                    <span>{t('kg')}</span>
-                </>
+              <>
+                <button
+                  onClick={() =>
+                    updateAmount(product.id, Math.max(0.1, product.amount - 0.1))
+                  }
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  value={product.amount}
+                  onChange={(e) =>
+                    updateAmount(product.id, parseFloat(e.target.value))
+                  }
+                />
+                <button
+                  onClick={() =>
+                    updateAmount(product.id, Math.min(2, product.amount + 0.1))
+                  }
+                >
+                  +
+                </button>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="2"
+                  step="0.1"
+                  value={product.amount}
+                  onChange={(e) =>
+                    updateAmount(product.id, parseFloat(e.target.value))
+                  }
+                  className="slider"
+                />
+              </>
             ) : (
-                <>
-                    <button
-                        onClick={() =>
-                            updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)
+              <>
+                <button
+                  onClick={() =>
+                    updateAmount(product.id, Math.max(1, product.amount - 1))
                   }
                   disabled={product.amount <= 1}
                 >
@@ -221,7 +245,9 @@ const ProductList = ({ addToCart }) => {
                 </button>
                 <p>{product.amount}</p>
                 <button
-                  onClick={() => updateAmount(product.id, product.amount + 1)}
+                  onClick={() =>
+                    updateAmount(product.id, product.amount + 1)
+                  }
                   disabled={product.amount >= product.amountInStock}
                 >
                   +
