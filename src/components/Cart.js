@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const CartContainer = styled.div`
   padding: 20px;
@@ -85,7 +86,7 @@ const TotalAmount = styled.div`
 `;
 
 const Cart = ({ cartItems, removeFromCart, updateQuantity }) => {
-
+    const { t } = useTranslation();
     const handleQuantityChange = (id, value) => {
         if (value > 0) {
             updateQuantity(id, parseFloat(value));
@@ -100,19 +101,19 @@ const Cart = ({ cartItems, removeFromCart, updateQuantity }) => {
 
     return (
         <CartContainer>
-            <h1>Ostukorv</h1>
+            <h1>{t('cart')}</h1>
             {cartItems.length === 0 ? (
-                <p>Ostukorv on tühi</p>
+                <p>{t('cart_is_empty')}</p>
             ) : (
                 cartItems.map((item) => (
                     <CartItem key={item.id}>
                         <ItemInfo>
                             <h3>{item.name}</h3>
-                            <p>Hind: €{(item.pricePerUnit * item.quantity).toFixed(2)}</p>
+                            <p>{t('price')}: €{(item.pricePerUnit * item.quantity).toFixed(2)}</p>
                             <QuantitySelector>
                                 {item.unit === "kg" ? (
                                     <>
-                                        <span>Количество: </span>
+                                        <span>{t('amount')}: </span>
                                         <input
                                             type="number"
                                             step="0.1"
@@ -120,11 +121,11 @@ const Cart = ({ cartItems, removeFromCart, updateQuantity }) => {
                                             value={item.quantity}
                                             onChange={(e) => handleQuantityChange(item.id, e.target.value)}
                                         />
-                                        <span>кг</span>
+                                        <span>{t('kg')}</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span>Kogus: </span>
+                                        <span>{t('amount')}: </span>
                                         <button onClick={() => updateQuantity(item.id, item.quantity + 1)}>+</button>
                                         <p>{item.quantity}</p>
                                         <button onClick={() => updateQuantity(item.id, item.quantity - 1 > 0 ? item.quantity - 1 : 1)}>-</button>
@@ -132,14 +133,14 @@ const Cart = ({ cartItems, removeFromCart, updateQuantity }) => {
                                 )}
                             </QuantitySelector>
                         </ItemInfo>
-                        <RemoveButton onClick={() => removeFromCart(item.id)}>Kustuta</RemoveButton>
+                        <RemoveButton onClick={() => removeFromCart(item.id)}>{t('delete')}</RemoveButton>
                     </CartItem>
                 ))
             )}
 
             {cartItems.length > 0 && (
                 <TotalAmount>
-                    Kogusumma: €{calculateTotal()}
+                    {t('total_amount')}: €{calculateTotal()}
                 </TotalAmount>
             )}
         </CartContainer>

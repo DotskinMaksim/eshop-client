@@ -6,7 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import Header from './components/Header';
 import OrderHistoryPage from './pages/OrderHistoryPage';
-
+import { useTranslation } from 'react-i18next';
 
 const App = () => {
     const [cartItems, setCartItems] = useState([]);
@@ -14,6 +14,7 @@ const App = () => {
     const [userId, setUserId] = useState(null); // Lisame userId
 
     const API_URL = process.env.REACT_APP_API_URL;
+  const { t } = useTranslation();
 
 
     // Laadime ostukorvi ja autentimise kontrolli
@@ -63,8 +64,7 @@ const App = () => {
             const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
 
             if (totalQuantityInCart > product.amountInStock) {
-                reject(`Нельзя добавить товар в корзину. В наличии осталось только ${product.amountInStock - (existingItem?.quantity || 0)} единиц.`);
-                return prevItems;
+                reject(`${t('the_product_cannot_be_added_to_the_cart')}. ${t('only_left_in_stock')}: ${(product.amountInStock - (existingItem?.quantity || 0)).toFixed(2)} ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);                return prevItems;
             }
 
             if (existingItem) {
@@ -98,8 +98,7 @@ const App = () => {
         }
 
         if (newQuantity > existingItem.amountInStock) {
-            alert(`Вы не можете установить количество больше доступного. В наличии осталось только ${existingItem.amountInStock - (existingItem?.quantity || 0)} единиц.`);
-            return prevItems; // Если превышен лимит, не изменяем количество
+            alert(`${t('you_cannot_set_a_quantity_greater_than_the_available_quantity')}. ${t('only_left_in_stock')}: ${(existingItem.amountInStock - (existingItem?.quantity || 0)).toFixed(2)} ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);            return prevItems; // Если превышен лимит, не изменяем количество
         }
 
         return prevItems.map((item) =>

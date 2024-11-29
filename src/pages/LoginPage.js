@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
+import { useTranslation } from 'react-i18next';
 
 const LoginPage = ({ login }) => {
     const [username, setUsername] = useState('');
@@ -9,6 +10,7 @@ const LoginPage = ({ login }) => {
     const navigate = useNavigate();
 
     const API_URL = process.env.REACT_APP_API_URL;
+  const { t } = useTranslation();
 
     useEffect(() => {
         const token = localStorage.getItem('userId');
@@ -46,13 +48,13 @@ const LoginPage = ({ login }) => {
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.heading}>Logi sisse</h2>
+            <h2 className={styles.heading}>{t('log_in')}</h2>
             <form onSubmit={handleLogin} className={styles.form}>
                 <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Kasutajanimi"
+                    placeholder={t('login')}
                     required
                     className={styles.input}
                 />
@@ -60,12 +62,12 @@ const LoginPage = ({ login }) => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Parool"
+                    placeholder={t('password')}
                     required
                     className={styles.input}
                 />
-                <button type="submit" className={styles.button}>Logi sisse</button>
-                <a href="register">Registreeru</a>
+                <button type="submit" className={styles.button}>{t('log_in')}</button>
+                <a href="register">{t('register')}</a>
             </form>
             {error && <p className={styles.errorMessage}>{error}</p>}
         </div>

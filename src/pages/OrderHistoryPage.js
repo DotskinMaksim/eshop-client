@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const OrderHistoryPage = ({ userId }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -33,7 +35,7 @@ const OrderHistoryPage = ({ userId }) => {
     }, [userId, navigate]);
 
     if (loading) {
-        return <p>Laadimine...</p>;
+        return <p>{t('loading')}...</p>;
     }
 
     if (error) {
@@ -42,25 +44,25 @@ const OrderHistoryPage = ({ userId }) => {
 
     return (
         <div style={styles.container}>
-            <h2 style={styles.header}>Tellimuste ajalugu</h2>
+            <h2 style={styles.header}>{t('my_orders')}</h2>
             {orders.length === 0 ? (
-                <p style={styles.noOrdersText}>Teil pole tellimusi.</p>
+                <p style={styles.noOrdersText}>{t('you_have_no_orders')}.</p>
             ) : (
                 <ul style={styles.orderList}>
                     {orders.map((order) => (
                         <li key={order.id} style={styles.orderItem}>
-                            <h3 style={styles.orderTitle}>Tellimus nr {order.id} kuupäevaga {order.date}</h3>
-                            <p style={styles.totalPrice}>Kogumaksumus: {order.totalPrice} €</p>
-                            <h4 style={styles.productTitle}>Tooted:</h4>
+                            <h3 style={styles.orderTitle}>{t('order')} № {order.id} {t('by')} {order.date}</h3>
+                            <p style={styles.totalPrice}>{t('total_cost')}: {order.totalPrice} €</p>
+                            <h4 style={styles.productTitle}>{t('products')}:</h4>
                             <ul style={styles.productList}>
                                 {order.items && Array.isArray(order.items) && order.items.length > 0 ? (
                                     order.items.map((item, index) => (
                                         <li key={item.name + item.quantity + index} style={styles.productItem}>
-                                            {item.name} - {item.quantity} {item.unit === 'kg' ? 'kg' : 'tk'} {/* Display kg for weight-based items */}
+                                            {item.name} - {item.quantity} {item.unit === 'kg' ? t('kg') : t('pcs')} {/* Display kg for weight-based items */}
                                         </li>
                                     ))
                                 ) : (
-                                    <p style={styles.noProductsText}>See tellimus ei sisalda tooteid.</p>
+                                    <p style={styles.noProductsText}>{t('this_order_does_not_include_products')}.</p>
                                 )}
                             </ul>
                         </li>

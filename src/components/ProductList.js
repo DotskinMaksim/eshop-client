@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const ProductListContainer = styled.div`
   display: flex;
@@ -107,11 +108,13 @@ const SuccessMessage = styled.p`
 const ProductList = ({ addToCart }) => {
   const [products, setProducts] = useState([]);
   const [successMessages, setSuccessMessages] = useState({});
+  const { t } = useTranslation();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://localhost:7188/api/products/withtax');
+        const response = await fetch(`${API_URL}/products/withtax`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -130,14 +133,16 @@ const ProductList = ({ addToCart }) => {
   }, []);
 
   const updateAmount = (id, newAmount) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id && newAmount <= product.amountInStock
-          ? { ...product, amount: newAmount }
-          : product
-      )
-    );
-  };
+  setProducts((prevProducts) =>
+    prevProducts.map((product) => {
+      if (product.id === id) {
+        const adjustedAmount = Math.max(0.1, Math.min(newAmount, product.amountInStock));
+        return { ...product, amount: adjustedAmount };
+      }
+      return product;
+    })
+  );
+};
 
  const handleAddToCart = (product) => {
   let productAdd = { ...product };
@@ -186,29 +191,29 @@ const ProductList = ({ addToCart }) => {
           <ProductName>{product.name}</ProductName>
           <ProductPrice>
             €
-            {(product.pricePerUnit )}
-            {product.unit === 'kg' ? ' /kg' : ''}
-            {product.hasBottle  ? ' + 0.10' : ''}
+              {(product.pricePerUnit )}
+              {product.unit === 'kg' ? '/'+t('kg') : ''}
+              {product.hasBottle  ? ' + 0.10' : ''}
           </ProductPrice>
           <QuantitySelector>
             {product.unit === 'kg' ? (
-              <>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  value={product.amount}
-                  onChange={(e) =>
-                    updateAmount(product.id, parseFloat(e.target.value))
-                  }
-                />
-                <span>kg</span>
-              </>
+                <>
+                    <input
+                        type="number"
+                        step="0.1"
+                        min="0.1"
+                        value={product.amount}
+                        onChange={(e) =>
+                            updateAmount(product.id, parseFloat(e.target.value))
+                        }
+                    />
+                    <span>{t('kg')}</span>
+                </>
             ) : (
-              <>
-                <button
-                  onClick={() =>
-                    updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)
+                <>
+                    <button
+                        onClick={() =>
+                            updateAmount(product.id, product.amount - 1 > 0 ? product.amount - 1 : 1)
                   }
                   disabled={product.amount <= 1}
                 >
@@ -225,9 +230,9 @@ const ProductList = ({ addToCart }) => {
             )}
           </QuantitySelector>
           {successMessages[product.id] && (
-            <SuccessMessage>Добавлено в корзину</SuccessMessage>
+            <SuccessMessage>{t('added_to_cart')}</SuccessMessage>
           )}
-          <AddToCartButton onClick={() => handleAddToCart(product)}>Добавить в корзину</AddToCartButton>
+          <AddToCartButton onClick={() => handleAddToCart(product)}>{t('add_to_cart')}</AddToCartButton>
         </ProductCard>
       ))}
     </ProductListContainer>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Register.module.css';
+import { useTranslation } from 'react-i18next';
 
 const RegisterPage = () => {
     const [username, setUsername] = useState('');
@@ -10,6 +11,7 @@ const RegisterPage = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL;
+  const { t } = useTranslation();
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -53,13 +55,13 @@ const RegisterPage = () => {
 
     return (
         <div className={styles.container}>
-            <h2 className={styles.heading}>Registreeri</h2>
+            <h2 className={styles.heading}>{t('register')}</h2>
             <form onSubmit={handleRegister} className={styles.form}>
                 <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Kasutajanimi"
+                    placeholder={t('login')}
                     required
                     className={styles.input}
                 />
@@ -67,7 +69,7 @@ const RegisterPage = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="E-post"
+                    placeholder={t('email')}
                     required
                     className={styles.input}
                 />
@@ -75,7 +77,7 @@ const RegisterPage = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Parool"
+                    placeholder={t('password')}
                     required
                     className={styles.input}
                 />
@@ -83,13 +85,13 @@ const RegisterPage = () => {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Kinnita parool"
+                    placeholder={t('confirm_password')}
                     required
                     className={styles.input}
                 />
 
-                <button type="submit" className={styles.button}>Registreeri</button>
-                <a href="login">Logi sisse</a>
+                <button type="submit" className={styles.button}>{t('register')}</button>
+                <a href="login">{t('log_in')}</a>
             </form>
             {error && <p className={styles.errorMessage}>{error}</p>}
         </div>
