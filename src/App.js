@@ -7,7 +7,10 @@ import LoginPage from './pages/LoginPage';
 import Header from './components/Header';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import { useTranslation } from 'react-i18next';
-
+import Layout from './components/Layout';
+import PrivacyPolicy from './components/Footer/PrivacyPolicy';
+import TermsOfService from './components/Footer/TermsOfService';
+import ContactUs from './components/Footer/ContactUs';
 const App = () => {
     const [cartItems, setCartItems] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -109,6 +112,7 @@ const App = () => {
 
     return (
         <Router>
+            <Layout>
             <Header
                 isAuthenticated={isAuthenticated}
                 logout={logout}
@@ -132,8 +136,13 @@ const App = () => {
                     element={<RegisterPage setIsAuthenticated={setIsAuthenticated} />}
                 />
                 <Route path="/login" element={<LoginPage login={login} />} />
-                <Route path="/order-history" element={<OrderHistoryPage userId={userId} />} /> {/* Anname userId */}
+                <Route path="/order-history" element={<OrderHistoryPage userId={userId} />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/contact-us" element={<ContactUs />} />
             </Routes>
+          </Layout>
+
         </Router>
     );
 };
