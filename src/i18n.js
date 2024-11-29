@@ -50,7 +50,12 @@ i18n
                 "the_product_cannot_be_added_to_the_cart": "The product cannot be added to the cart",
                 "only_left_in_stock": "Only left in stock",
                 "you_cannot_set_a_quantity_greater_than_the_available_quantity": "You cannot set a quantity greater than the available quantity",
-
+                "all_categories": "All categories",
+                "vegetables": "Vegetables",
+                "drinks": "Drinks",
+                "fruits": "Fruits",
+                "dairy": "Dairy",
+                "snacks": "Snacks"
             }
         },
         et: {
@@ -93,6 +98,12 @@ i18n
                 "the_product_cannot_be_added_to_the_cart": "Toodet ei saa ostukorvi lisada",
                 "only_left_in_stock": "Ainult laost jäänud",
                 "you_cannot_set_a_quantity_greater_than_the_available_quantity": "Te ei saa määrata saadaolevast kogusest suuremat kogust",
+                "all_categories": "Kõik kategooriad",
+                "vegetables": "Köögiviljad",
+                "drinks": "Joogid",
+                "fruits": "Puuviljad",
+                "dairy": "Piimatooted",
+                "snacks": "Suupisted",
 
                 }
             },
@@ -136,6 +147,16 @@ i18n
                 "the_product_cannot_be_added_to_the_cart": "Товар не может быть добавлен в корзину",
                 "only_left_in_stock": "В наличии осталось только",
                 "you_cannot_set_a_quantity_greater_than_the_available_quantity": "Вы не можете установить количество больше доступного количества",
+                "all_categories": "Все категории",
+                "vegetables": "Овощи",
+                "drinks": "Напитки",
+                "fruits": "Фрукты",
+                "dairy": "Молочные продукты",
+                "snacks": "Закуски",
+
+
+
+
 }
       },
       // добавьте другие языки здесь

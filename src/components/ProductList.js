@@ -80,7 +80,11 @@ const QuantitySelector = styled.div`
     margin: 10px 0;
   }
 `;
-
+const CategorySelector = styled.select`
+  padding: 5px;
+  margin: 20px;
+  font-size: 16px;
+`;
 const AddToCartButton = styled.button`
   background-color: #4caf50;
   color: white;
@@ -115,11 +119,12 @@ const ProductList = ({ addToCart }) => {
   const [successMessages, setSuccessMessages] = useState({});
   const { t } = useTranslation();
   const API_URL = process.env.REACT_APP_API_URL;
+  const [category, setCategory] = useState('');
 
-  useEffect(() => {
+   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API_URL}/products/withtax`);
+        const response = await fetch(`${API_URL}/products/withtax?category=${category}`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -135,7 +140,7 @@ const ProductList = ({ addToCart }) => {
     };
 
     fetchProducts();
-  }, []);
+  }, [category]);
 
   const updateAmount = (id, newAmount) => {
     setProducts((prevProducts) =>
@@ -184,71 +189,88 @@ const ProductList = ({ addToCart }) => {
   };
 
   return (
-    <ProductListContainer>
-      {products.map((product) => (
-        <ProductCard key={product.id}>
-          <ProductImage src={product.imageUrl} alt={product.name} />
-          <ProductName>{product.name}</ProductName>
-          <ProductPrice>
-            €
-              {(product.pricePerUnit )}
-              {product.unit === 'kg' ? '/'+t('kg') : ''}
-              {product.hasBottle  ? ' + 0.10' : ''}
-          </ProductPrice>
-          <QuantitySelector>
-            {product.unit === 'kg' ? (
-                <>
-                  <input
-                      type="number"
-                      step="0.1"
-                      min="0.1"
-                      value={product.amount}
-                      onChange={(e) =>
-                          updateAmount(product.id, parseFloat(e.target.value))
-                      }
-                  />
-                  <input
-                      type="range"
-                      min="0.1"
-                      max={product.amountInStock}
-                      step="0.1"
-                      value={product.amount}
-                      onChange={(e) =>
-                          updateAmount(product.id, parseFloat(e.target.value))
-                      }
-                      className="slider"
-                  />
-                </>
-            ) : (
-                <>
-                  <button
-                      onClick={() =>
-                          updateAmount(product.id, Math.max(1, product.amount - 1))
-                      }
-                      disabled={product.amount <= 1}
-                  >
-                    -
-                  </button>
-                  <p>{product.amount}</p>
-                  <button
-                      onClick={() =>
-                          updateAmount(product.id, product.amount + 1)
-                      }
-                      disabled={product.amount >= product.amountInStock}
-                  >
-                    +
-                  </button>
-                </>
-            )}
-          </QuantitySelector>
-          {successMessages[product.id] && (
-            <SuccessMessage>{t('added_to_cart')}</SuccessMessage>
-          )}
-          <AddToCartButton onClick={() => handleAddToCart(product)}>{t('add_to_cart')}</AddToCartButton>
-        </ProductCard>
-      ))}
-    </ProductListContainer>
-  );
-};
+      <div>
 
-export default ProductList;
+          <CategorySelector
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+          >
+              <option value="">{t('all_categories')}</option>
+              <option value="Juurviljad">{t('vegetables')}</option>
+              <option value="Puuviljad">{t('fruits')}</option>
+              <option value="Joogid">{t('drinks')}</option>
+              <option value="Piimatoodet">{t('dairy')}</option>
+              <option value="Snakid">{t('snacks')}</option>
+
+          </CategorySelector>
+
+          <ProductListContainer>
+              {products.map((product) => (
+                  <ProductCard key={product.id}>
+                      <ProductImage src={product.imageUrl} alt={product.name}/>
+                <ProductName>{product.name}</ProductName>
+                <ProductPrice>
+                  €
+                  {(product.pricePerUnit)}
+                  {product.unit === 'kg' ? '/' + t('kg') : ''}
+                  {product.hasBottle ? ' + 0.10' : ''}
+                </ProductPrice>
+                <QuantitySelector>
+                  {product.unit === 'kg' ? (
+                      <>
+                        <input
+                            type="number"
+                            step="0.1"
+                            min="0.1"
+                            value={product.amount}
+                            onChange={(e) =>
+                                updateAmount(product.id, parseFloat(e.target.value))
+                            }
+                        />
+                        <input
+                            type="range"
+                            min="0.1"
+                            max={product.amountInStock}
+                            step="0.1"
+                            value={product.amount}
+                            onChange={(e) =>
+                                updateAmount(product.id, parseFloat(e.target.value))
+                            }
+                            className="slider"
+                        />
+                      </>
+                  ) : (
+                      <>
+                        <button
+                            onClick={() =>
+                                updateAmount(product.id, Math.max(1, product.amount - 1))
+                            }
+                            disabled={product.amount <= 1}
+                        >
+                          -
+                        </button>
+                        <p>{product.amount}</p>
+                        <button
+                            onClick={() =>
+                                updateAmount(product.id, product.amount + 1)
+                            }
+                            disabled={product.amount >= product.amountInStock}
+                        >
+                          +
+                        </button>
+                      </>
+                  )}
+                </QuantitySelector>
+                {successMessages[product.id] && (
+                    <SuccessMessage>{t('added_to_cart')}</SuccessMessage>
+                )}
+                <AddToCartButton onClick={() => handleAddToCart(product)}>{t('add_to_cart')}</AddToCartButton>
+              </ProductCard>
+          ))}
+        </ProductListContainer>
+      </div>
+
+        );
+        };
+
+        export default ProductList;
