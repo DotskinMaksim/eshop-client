@@ -135,45 +135,59 @@ const ProductList = ({ addToCart }) => {
   const [successMessages, setSuccessMessages] = useState({});
   const [category, setCategory] = useState('');
   const [offset, setOffset] = useState(0);
-  const quantityToLoad = 10;
   const [isLoading, setIsLoading] = useState(false);
+  const [cache, setCache] = useState({}); // Кэш для продуктов по категориям
+  const quantityToLoad = 10;
   const { t } = useTranslation();
   const API_URL = process.env.REACT_APP_API_URL;
 
-const fetchProducts = async (append = false, currentOffset = 0) => {
-  setIsLoading(true);
-  try {
-    const response = await fetch(
-      `${API_URL}/products?offset=${currentOffset}&limit=${quantityToLoad}&withTax=true&withBottlePrice=true&category=${category}`
-    );
-    if (!response.ok) throw new Error('Failed to fetch products');
+  const fetchProducts = async (append = false, currentOffset = 0, currentCategory = '') => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/products?offset=${currentOffset}&limit=${quantityToLoad}&withTax=true&withBottlePrice=true&category=${currentCategory}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch products');
 
-    const data = await response.json();
-    const initializedProducts = data.map((product) => ({
-      ...product,
-      amount: product.unit === 'kg' ? 0.1 : 1,
-    }));
+      const data = await response.json();
+      const initializedProducts = data.map((product) => ({
+        ...product,
+        amount: product.unit === 'kg' ? 0.1 : 1,
+      }));
 
-    setProducts((prevProducts) =>
-      append ? [...prevProducts, ...initializedProducts] : initializedProducts
-    );
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // Обновляем кэш
+      setCache((prevCache) => ({
+        ...prevCache,
+        [currentCategory]: append
+          ? [...(prevCache[currentCategory] || []), ...initializedProducts]
+          : initializedProducts,
+      }));
 
-useEffect(() => {
-  setOffset(0); // Сброс offset при смене категории
-  fetchProducts(false, 0);
-}, [category]);
+      setProducts((prevProducts) =>
+        append ? [...prevProducts, ...initializedProducts] : initializedProducts
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (cache[category]) {
+      // Если категория уже есть в кэше, загружаем из него
+      setProducts(cache[category]);
+    } else {
+      // Если категории нет в кэше, делаем запрос
+      fetchProducts(false, 0, category);
+    }
+    setOffset(0); // Сбрасываем offset при смене категории
+  }, [category]);
 
   const updateAmount = (id, newAmount) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
-        product.id === id && newAmount <= product.amountInStock && newAmount!==0
+        product.id === id && newAmount <= product.amountInStock && newAmount !== 0
           ? { ...product, amount: newAmount }
           : product
       )
@@ -211,6 +225,7 @@ useEffect(() => {
         alert(errorMessage);
       });
   };
+
   return (
     <div>
       <CategorySelector value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -229,10 +244,9 @@ useEffect(() => {
             <ProductName>{product.name}</ProductName>
             <ProductPrice>
               €
-                {product.hasBottle ?
-                    (product.pricePerUnit - 0.10).toFixed(2) :
-                    product.pricePerUnit.toFixed(2)
-                }
+              {product.hasBottle
+                ? (product.pricePerUnit - 0.10).toFixed(2)
+                : product.pricePerUnit.toFixed(2)}
               {product.unit === 'kg' ? '/' + t('kg') : ''}
               {product.hasBottle ? ' + 0.10' : ''}
             </ProductPrice>
@@ -244,9 +258,7 @@ useEffect(() => {
                     step="0.1"
                     min="0.1"
                     value={product.amount}
-                    onChange={(e) =>
-                      updateAmount(product.id, parseFloat(e.target.value))
-                    }
+                    onChange={(e) => updateAmount(product.id, parseFloat(e.target.value))}
                   />
                   <input
                     type="range"
@@ -254,9 +266,7 @@ useEffect(() => {
                     max={product.amountInStock}
                     step="0.1"
                     value={product.amount}
-                    onChange={(e) =>
-                      updateAmount(product.id, parseFloat(e.target.value))
-                    }
+                    onChange={(e) => updateAmount(product.id, parseFloat(e.target.value))}
                     className="slider"
                   />
                 </>
@@ -272,9 +282,7 @@ useEffect(() => {
                   </button>
                   <p>{product.amount}</p>
                   <button
-                    onClick={() =>
-                      updateAmount(product.id, product.amount + 1)
-                    }
+                    onClick={() => updateAmount(product.id, product.amount + 1)}
                     disabled={product.amount >= product.amountInStock}
                   >
                     +
@@ -291,20 +299,20 @@ useEffect(() => {
           </ProductCard>
         ))}
       </ProductListContainer>
-       {products.length % quantityToLoad === 0 && products.length !== 0 ? (
-      <LoadMoreButton
-        onClick={() => {
-          const newOffset = offset + quantityToLoad;
-          setOffset(newOffset);
-          fetchProducts(true, newOffset);
-        }}
-        disabled={isLoading}
-      >
-        {isLoading ? t('loading') : t('load_more')}
-      </LoadMoreButton>
-    ) : null}
-     </div>
-      );
-    };
+      {products.length % quantityToLoad === 0 && products.length !== 0 ? (
+        <LoadMoreButton
+          onClick={() => {
+            const newOffset = offset + quantityToLoad;
+            setOffset(newOffset);
+            fetchProducts(true, newOffset, category);
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? t('loading') : t('load_more')}
+        </LoadMoreButton>
+      ) : null}
+    </div>
+  );
+};
 
 export default ProductList;
