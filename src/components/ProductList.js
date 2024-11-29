@@ -126,7 +126,7 @@ const ProductList = ({ addToCart }) => {
         const data = await response.json();
         const initializedProducts = data.map((product) => ({
           ...product,
-          amount: 1,
+          amount: product.unit === 'kg' ? 0.1 : 1,
         }));
         setProducts(initializedProducts);
       } catch (error) {
@@ -140,7 +140,7 @@ const ProductList = ({ addToCart }) => {
   const updateAmount = (id, newAmount) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
-        product.id === id && newAmount <= product.amountInStock
+        product.id === id && newAmount <= product.amountInStock && newAmount!==0
           ? { ...product, amount: newAmount }
           : product
       )
@@ -174,7 +174,7 @@ const ProductList = ({ addToCart }) => {
 
         setProducts((prevProducts) =>
           prevProducts.map((p) =>
-            p.id === product.id ? { ...p, amount: 1 } : p
+            p.id === product.id ? { ...p, amount: product.unit === 'kg' ? 0.1 : 1 } : p
           )
         );
       })
@@ -197,62 +197,48 @@ const ProductList = ({ addToCart }) => {
           </ProductPrice>
           <QuantitySelector>
             {product.unit === 'kg' ? (
-              <>
-                <button
-                  onClick={() =>
-                    updateAmount(product.id, Math.max(0.1, product.amount - 0.1))
-                  }
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  value={product.amount}
-                  onChange={(e) =>
-                    updateAmount(product.id, parseFloat(e.target.value))
-                  }
-                />
-                <button
-                  onClick={() =>
-                    updateAmount(product.id, Math.min(2, product.amount + 0.1))
-                  }
-                >
-                  +
-                </button>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="2"
-                  step="0.1"
-                  value={product.amount}
-                  onChange={(e) =>
-                    updateAmount(product.id, parseFloat(e.target.value))
-                  }
-                  className="slider"
-                />
-              </>
+                <>
+                  <input
+                      type="number"
+                      step="0.1"
+                      min="0.1"
+                      value={product.amount}
+                      onChange={(e) =>
+                          updateAmount(product.id, parseFloat(e.target.value))
+                      }
+                  />
+                  <input
+                      type="range"
+                      min="0.1"
+                      max={product.amountInStock}
+                      step="0.1"
+                      value={product.amount}
+                      onChange={(e) =>
+                          updateAmount(product.id, parseFloat(e.target.value))
+                      }
+                      className="slider"
+                  />
+                </>
             ) : (
-              <>
-                <button
-                  onClick={() =>
-                    updateAmount(product.id, Math.max(1, product.amount - 1))
-                  }
-                  disabled={product.amount <= 1}
-                >
-                  -
-                </button>
-                <p>{product.amount}</p>
-                <button
-                  onClick={() =>
-                    updateAmount(product.id, product.amount + 1)
-                  }
-                  disabled={product.amount >= product.amountInStock}
-                >
-                  +
-                </button>
-              </>
+                <>
+                  <button
+                      onClick={() =>
+                          updateAmount(product.id, Math.max(1, product.amount - 1))
+                      }
+                      disabled={product.amount <= 1}
+                  >
+                    -
+                  </button>
+                  <p>{product.amount}</p>
+                  <button
+                      onClick={() =>
+                          updateAmount(product.id, product.amount + 1)
+                      }
+                      disabled={product.amount >= product.amountInStock}
+                  >
+                    +
+                  </button>
+                </>
             )}
           </QuantitySelector>
           {successMessages[product.id] && (
