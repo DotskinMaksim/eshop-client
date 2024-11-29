@@ -7,7 +7,7 @@ import { initReactI18next } from 'react-i18next';
 i18n
   .use(initReactI18next)
   .init({
-    fallbackLng: 'et', // язык по умолчанию
+    fallbackLng: 'et',
     debug: true,
     resources: {
         en: {
@@ -56,6 +56,7 @@ i18n
                 "fruits": "Fruits",
                 "dairy": "Dairy",
                 "snacks": "Snacks",
+                "load_more": "Load more",
                 "online_store": "Online store",
                  "contact_us_title": "Contact Us",
                   "contact_us_intro": "Need help? Reach out to DotShop through any of the following methods:",
@@ -130,7 +131,7 @@ i18n
                 "dairy": "Piimatooted",
                 "snacks": "Suupisted",
                 "online_store": "Veebipood",
-
+                "load_more": "Laadi rohkem",
                 "contact_us_title": "Võtke meiega ühendust",
                 "contact_us_intro": "Kas vajate abi? Võtke DotShopiga ühendust järgmiste meetodite kaudu:",
                 "email_label": "E-post",
@@ -205,6 +206,7 @@ i18n
                 "fruits": "Фрукты",
                 "dairy": "Молочные продукты",
                 "snacks": "Закуски",
+                "load_more": "Загрузить дополнительно",
                 "online_store": "Интернет-магазин",
                 "contact_us_title": "Свяжитесь с нами",
                 "contact_us_intro": "Нужна помощь? Свяжитесь с DotShop через следующие методы:",
@@ -236,14 +238,9 @@ i18n
 
 }
       },
-      // добавьте другие языки здесь
     },
-    // если хотите загружать переводы с сервера
-    // backend: {
-    //   loadPath: '/locales/{{lng}}/{{ns}}.json',
-    // },
     interpolation: {
-      escapeValue: false // not needed for React as it escapes by default
+      escapeValue: false
     }
   });
 

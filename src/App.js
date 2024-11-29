@@ -67,7 +67,12 @@ const App = () => {
             const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
 
             if (totalQuantityInCart > product.amountInStock) {
-                reject(`${t('the_product_cannot_be_added_to_the_cart')}. ${t('only_left_in_stock')}: ${(product.amountInStock - (existingItem?.quantity || 0)).toFixed(2)} ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);                return prevItems;
+                reject(`${t('the_product_cannot_be_added_to_the_cart')}. ${t('only_left_in_stock')}: ${
+                    existingItem.unit === 'kg'
+                        ? (existingItem.amountInStock - (existingItem?.quantity || 0)).toFixed(2)
+                        : existingItem.amountInStock - (existingItem?.quantity || 0)
+                } ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);
+                return prevItems;
             }
 
             if (existingItem) {
@@ -101,7 +106,14 @@ const App = () => {
         }
 
         if (newQuantity > existingItem.amountInStock) {
-            alert(`${t('you_cannot_set_a_quantity_greater_than_the_available_quantity')}. ${t('only_left_in_stock')}: ${(existingItem.amountInStock - (existingItem?.quantity || 0)).toFixed(2)} ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);            return prevItems; // Если превышен лимит, не изменяем количество
+            alert(
+              `${t('you_cannot_set_a_quantity_greater_than_the_available_quantity')}. ${t('only_left_in_stock')}: ${
+                existingItem.unit === 'kg'
+                  ? (existingItem.amountInStock - (existingItem?.quantity || 0)).toFixed(2)
+                  : existingItem.amountInStock - (existingItem?.quantity || 0)
+              } ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`
+            );
+            return prevItems; // Если превышен лимит, не изменяем количество
         }
 
         return prevItems.map((item) =>
@@ -112,11 +124,8 @@ const App = () => {
 
     return (
         <Router>
-            <Layout>
-            <Header
-                isAuthenticated={isAuthenticated}
-                logout={logout}
-            />
+      <Layout isAuthenticated={isAuthenticated} logout={logout}>
+
             <Routes>
                 <Route path="/" element={<HomePage addToCart={addToCart} />} />
                 <Route
