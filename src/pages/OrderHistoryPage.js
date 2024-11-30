@@ -7,7 +7,7 @@ const OrderHistoryPage = ({ userId }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();  // access the i18n object for language
 
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -56,11 +56,11 @@ const OrderHistoryPage = ({ userId }) => {
                             <h4 style={styles.productTitle}>{t('products')}:</h4>
                             <ul style={styles.productList}>
                                 {order.items && Array.isArray(order.items) && order.items.length > 0 ? (
-                                    order.items.map((item, index) => (
-                                        <li key={item.name + item.quantity + index} style={styles.productItem}>
-                                            {item.name} - {item.quantity} {item.unit === 'kg' ? t('kg') : t('pcs')} {/* Display kg for weight-based items */}
-                                        </li>
-                                    ))
+                                  order.items.map((item, index) => (
+                                    <li key={item.name + item.quantity + index} style={styles.productItem}>
+                                        {item.names[i18n.language]} - {item.quantity} {item.unit === 'kg' ? t('kg') : t('pcs')}
+                                    </li>
+                                ))
                                 ) : (
                                     <p style={styles.noProductsText}>{t('this_order_does_not_include_products')}.</p>
                                 )}
