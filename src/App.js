@@ -11,6 +11,7 @@ import Layout from './components/Layout';
 import PrivacyPolicy from './components/Footer/PrivacyPolicy';
 import TermsOfService from './components/Footer/TermsOfService';
 import ContactUs from './components/Footer/ContactUs';
+import i18n from "i18next";
 const App = () => {
     const [cartItems, setCartItems] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -59,34 +60,39 @@ const App = () => {
         setUserId(null); // Eemaldame userId välja logides
     };
 
-  const addToCart = (product) => {
-    return new Promise((resolve, reject) => {
-        setCartItems((prevItems) => {
-            const existingItem = prevItems.find((item) => item.id === product.id);
+ const addToCart = (product) => {
+  return new Promise((resolve, reject) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((item) => item.id === product.id);
 
-            const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
+      const totalQuantityInCart = existingItem ? existingItem.quantity + product.quantity : product.quantity;
 
-            if (totalQuantityInCart > product.amountInStock) {
-                reject(`${t('the_product_cannot_be_added_to_the_cart')}. ${t('only_left_in_stock')}: ${
-                    existingItem.unit === 'kg'
-                        ? (existingItem.amountInStock - (existingItem?.quantity || 0)).toFixed(2)
-                        : existingItem.amountInStock - (existingItem?.quantity || 0)
-                } ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);
-                return prevItems;
-            }
+      if (totalQuantityInCart > product.amountInStock) {
+        reject(`${t('the_product_cannot_be_added_to_the_cart')}. ${t('only_left_in_stock')}: ${
+            existingItem.unit === 'kg'
+              ? (existingItem.amountInStock - (existingItem?.quantity || 0)).toFixed(2)
+              : existingItem.amountInStock - (existingItem?.quantity || 0)
+          } ${existingItem.unit === 'kg' ? t('kg') : t('pcs')}.`);
+        return prevItems;
+      }
 
-            if (existingItem) {
-                return prevItems.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: totalQuantityInCart }
-                        : item
-                );
-            }
+      const localizedProduct = {
+        ...product,
+        name: product[`name${i18n.language.charAt(0).toUpperCase() + i18n.language.slice(1)}`]  // Добавляем переведенное имя
+      };
 
-            return [...prevItems, { ...product, quantity: product.quantity }];
-        });
-        resolve();
+      if (existingItem) {
+        return prevItems.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: totalQuantityInCart }
+            : item
+        );
+      }
+
+      return [...prevItems, { ...localizedProduct, quantity: localizedProduct.quantity }];
     });
+    resolve();
+  });
 };
 
    const removeFromCart = (id) => {

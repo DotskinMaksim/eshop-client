@@ -137,23 +137,24 @@ const ProductList = ({ addToCart }) => {
   const [category, setCategory] = useState('');
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [cache, setCache] = useState({}); // Cache for products by category
+  const [cache, setCache] = useState({});
   const quantityToLoad = 10;
-const { t, i18n } = useTranslation();
-const API_URL = process.env.REACT_APP_API_URL;
+  const { t, i18n } = useTranslation();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Fetch categories from the backend
-const fetchCategories = async () => {
-  try {
-    const response = await fetch(`${API_URL}/products/categories?lang=${i18n.language}`);
-    if (!response.ok) throw new Error('Не удалось получить категории');
-    const data = await response.json();
-    setCategories(data);  // Сохраняем категории в state
-  } catch (error) {
-    console.error(error);
-  }
-};
-  // Fetch products by category
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/products/categories?lang=${i18n.language}`);
+      if (!response.ok) throw new Error('Не удалось получить категории');
+      const data = await response.json();
+      setCategories(data);  // Сохраняем категории в state
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Fetch products by category and language
   const fetchProducts = async (append = false, currentOffset = 0, currentCategory = '') => {
     setIsLoading(true);
     try {
@@ -166,9 +167,9 @@ const fetchCategories = async () => {
       const initializedProducts = data.map((product) => ({
         ...product,
         amount: product.unit === 'kg' ? 0.1 : 1,
+        name: product[`name${i18n.language.charAt(0).toUpperCase() + i18n.language.slice(1)}`] // Dynamically set the name based on language
       }));
 
-      // Update cache
       setCache((prevCache) => ({
         ...prevCache,
         [currentCategory]: append
@@ -186,18 +187,21 @@ const fetchCategories = async () => {
     }
   };
 
-    useEffect(() => {
-    fetchCategories();  // Загружаем категории при изменении языка
-    }, [i18n.language]); // Зависимость от языка
+  // Fetch categories when language changes
+  useEffect(() => {
+      fetchProducts();
+    fetchCategories();
+  }, [i18n.language]);
 
+  // Fetch products based on category and language
   useEffect(() => {
     if (cache[category]) {
-      setProducts(cache[category]);  // Load products from cache
+      setProducts(cache[category]);
     } else {
-      fetchProducts(false, 0, category);  // Fetch products if not in cache
+      fetchProducts(false, 0, category);
     }
-    setOffset(0);  // Reset offset when category changes
-  }, [category]);
+    setOffset(0);
+  }, [category, i18n.language]); // Depend on i18n.language to trigger name updates
 
   const updateAmount = (id, newAmount) => {
     setProducts((prevProducts) =>
@@ -243,22 +247,20 @@ const fetchCategories = async () => {
 
   return (
     <div>
-      {/* Category Selector */}
-     <CategorySelector value={category} onChange={(e) => setCategory(e.target.value)}>
-  <option value="">{t('all_categories')}</option>
-  {categories.map((cat) => (
-    <option key={cat.id} value={cat.nameEn}>
-      {cat.name} {/* Отображаем название на выбранном языке */}
-    </option>
-  ))}
-</CategorySelector>
+      <CategorySelector value={category} onChange={(e) => setCategory(e.target.value)}>
+        <option value="">{t('all_categories')}</option>
+        {categories.map((cat) => (
+          <option key={cat.id} value={cat.nameEn}>
+            {cat.name} {/* Display category in the selected language */}
+          </option>
+        ))}
+      </CategorySelector>
 
-      {/* Product List */}
       <ProductListContainer>
         {products.map((product) => (
           <ProductCard key={product.id}>
             <ProductImage src={product.imageUrl} alt={product.name} />
-            <ProductName>{product.name}</ProductName>
+            <ProductName>{product.name}</ProductName> {/* Display the product name based on selected language */}
             <ProductPrice>
               €
               {product.hasBottle
@@ -316,6 +318,7 @@ const fetchCategories = async () => {
           </ProductCard>
         ))}
       </ProductListContainer>
+
       {products.length % quantityToLoad === 0 && products.length !== 0 ? (
         <LoadMoreButton
           onClick={() => {
@@ -331,5 +334,4 @@ const fetchCategories = async () => {
     </div>
   );
 };
-
 export default ProductList;
