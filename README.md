@@ -2,6 +2,8 @@
 
 This README provides an overview of the **Dotskin Web API and Client Project**, alongside a structured guide for developing new features. The document includes API details, client structure, and a roadmap for feature development.
 
+- Back-end [GitHub Repo](https://github.com/DotskinMaksim/eshop-api)
+
 ---
 
 ## Project Overview
