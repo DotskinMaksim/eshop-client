@@ -467,7 +467,7 @@ By implementing these improvements, your code will be more maintainable, secure,
 
 
 
-### Project Retrospective
+### 9. Project Retrospective
 
 #### Project Outcomes
 
