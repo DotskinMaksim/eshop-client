@@ -562,12 +562,54 @@ npm start
 ```bash
 npm run build
 ```
+
+## API Setup
+
+1.	Install NuGet packages:
+In your solution, install the required NuGet packages:
+```bash
+dotnet add package Microsoft.EntityFrameworkCore --version 9.0.0
+dotnet add package Pomelo.EntityFrameworkCore.MySql --version 9.0.0-preview-1
+dotnet add package Microsoft.AspNetCore.Mvc.NewtonsoftJson --version 8.0.0
+dotnet add package Swashbuckle.AspNetCore --version 6.5.0
+```
+
+2.	Setup Entity Framework Core:
+Configure Entity Framework Core in your Startup.cs or Program.cs file:
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), 
+            new MySqlServerVersion(new Version(8, 0, 21))));
+    services.AddControllers();
+}
+```
+
+
+3.	Run migrations:
+Ensure your database schema is updated with the latest changes:
+```bash
+
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+```
+
+
+4.	Start the API:
+Run the API server locally:
+```bash
+
+dotnet run
+```
+
+
 ## Technology Stack
 
 
 	•	Backend: ASP.NET Core 8.0, Entity Framework Core 9.0, Pomelo MySQL
-	•	Frontend: React
-	•	Database: MySQL
+	•	Frontend: React, i18n
+	•	Database: MySQL, MariaDB
 	•	Testing: Postman, Unit Testsб Cypress
 
 ## Contribution Guidelines
