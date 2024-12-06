@@ -143,3 +143,31 @@ This project consists of a **backend API** built with ASP.NET Core and Entity Fr
 1. **Install dependencies**:
    ```bash
    npm install
+
+	2.	Start development server:
+
+npm start
+
+
+	3.	Build for production:
+
+npm run build
+
+Technology Stack
+
+	•	Backend: ASP.NET Core 8.0, Entity Framework Core 9.0, Pomelo MySQL
+	•	Frontend: React
+	•	Database: MySQL
+	•	Testing: Postman, Unit Tests
+
+Contribution Guidelines
+
+	•	Follow the feature development process outlined above.
+	•	Use meaningful commit messages.
+	•	Ensure all new features are fully tested and documented.
+	•	Participate in code reviews to maintain code quality.
+
+License
+
+This project is open-source. Feel free to contribute!
+
