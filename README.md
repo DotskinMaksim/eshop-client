@@ -3,7 +3,7 @@
 This README provides an overview of the **Dotskin Web API and Client Project**, alongside a structured guide for developing new features. The document includes API details, client structure, and a roadmap for feature development.
 
 - Back-end [GitHub Repo](https://github.com/DotskinMaksim/eshop-api)
-- Unit-tests [GitHub Repo](https://github.com/DotskinMaksim/site-testing-scripts/tree/main/Cypress/dotshop-testing)
+- Unit-tests [GitHub Repo](https://github.com/DotskinMaksim/site-testing-scripts/blob/main/Cypress/dotshop_tests.cy.js)
 
 ---
 ## Table of Contents
