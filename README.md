@@ -5,7 +5,32 @@ This README provides an overview of the **Dotskin Web API and Client Project**, 
 - Back-end [GitHub Repo](https://github.com/DotskinMaksim/eshop-api)
 
 ---
+## Table of Contents
+- [Project Overview](#project-overview)
+  - [Backend API Features](#backend-api-features)
+  - [Frontend Client Features](#frontend-client-features)
+- [Development Workflow: Feature Development Process](#development-workflow-feature-development-process)
+  - [1. Idea and Requirement Analysis](#1-idea-and-requirement-analysis)
+  - [2. Technical Analysis and Evaluation](#2-technical-analysis-and-evaluation)
+  - [3. Design and Prototyping](#3-design-and-prototyping)
+  - [4. Planning and Prioritization](#4-planning-and-prioritization)
+  - [5. Development](#5-development)
+  - [6. Testing](#6-testing)
+  - [7. Code Review](#7-code-review)
+  - [8. Documentation](#8-documentation)
+  - [9. Pre-Release Testing](#9-pre-release-testing)
+  - [10. Release](#10-release)
+  - [11. Monitoring and Support](#11-monitoring-and-support)
+  - [12. Retrospective](#12-retrospective)
+- [API Usage](#api-usage)
+  - [Authentication Endpoints](#authentication-endpoints)
+  - [Product Endpoints](#product-endpoints)
+- [Client Setup](#client-setup)
+- [Technology Stack](#technology-stack)
+- [Contribution Guidelines](#contribution-guidelines)
+- [License](#license)
 
+---
 ## Project Overview
 
 This project consists of a **backend API** built with ASP.NET Core and Entity Framework Core and a **frontend client** developed using React. It supports product and category management, authentication, and basic e-commerce functionality like orders.
