@@ -143,16 +143,16 @@ This project consists of a **backend API** built with ASP.NET Core and Entity Fr
 1. **Install dependencies**:
    ```bash
    npm install
-
-	2.	Start development server:
-
+   ```
+2. **Start development server**:
+```bash
 npm start
+ ```
 
-
-	3.	Build for production:
-
+3. **Build for production**:
+```bash
 npm run build
-
+```
 Technology Stack
 
 	•	Backend: ASP.NET Core 8.0, Entity Framework Core 9.0, Pomelo MySQL
