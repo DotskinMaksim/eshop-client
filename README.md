@@ -8,8 +8,6 @@ This README provides an overview of the **Dotskin Web API and Client Project**, 
 ---
 ## Table of Contents
 
-## Table of Contents
-
 1. [Project Overview](#project-overview)
 2. [Backend API Features](#backend-api-features)
 3. [Frontend Client Features](#frontend-client-features)
